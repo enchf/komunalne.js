@@ -60,5 +60,5 @@ QUnit.test("Komunalne.js currency formatter", function(assert) {
   cases.push({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65", 
                "msg": "Lenght > 1 separators" });
   
-  Komunalne.test.execute(cases, { fn: Komunalne.format.currency }, { fn: assert.equal, scope: assert });
+  Komunalne.test.execute(cases, Komunalne.format.currency, { fn: assert.equal, scope: assert });
 });

@@ -12,26 +12,33 @@ Komunalne.format = {};
  *   - expected (optional): If the test function need a comparison object.
  *   - msg (optional): Custom message for the unit test execution.
  *   These arguments are passed in the same order as they are listed to the test method (if they are present).
- * @param method An object with the definition of the method to be tested. Contains 2 properties:
+ * @param method Any of a function or an object with the definition of the method to be tested.
+ *   If an object is passed as argument, contains 2 properties:
  *   - fn: The method to be tested.
  *   - scope (optional): Method execution scope, if needed.
  * @param test An object with the definition of the testing method. 
  *   This object should have the same properties as method argument.
+ *   When using QUnit.assert object methods, assert object itself should be passed as scope.
  */
 Komunalne.test.execute = function(cases,method,test) {
   var testcase;
   var args;
   var result;
+  var mf,ms,tf,ts;
   for (var i in cases) {
     testcase = cases[i];
     args = [];
-    result = method.fn.apply(method.scope != undefined ? method.scope : null, testcase.args);
+    mf = typeof method == "function" ? method : method.fn;
+    ms = typeof method == "function" ? null : (method.scope != undefined ? method.scope : null);
+    tf = typeof test == "function" ? test : test.fn;
+    ts = typeof test == "function" ? null : (test.scope != undefined ? test.scope : null);
+    result = mf.apply(ms, testcase.args);
     
     args.push(result);
     if (testcase.expected) args.push(testcase.expected);
     if (testcase.msg) args.push(testcase.msg);
     
-    test.fn.apply(test.scope != undefined ? test.scope : null, args);
+    tf.apply(ts, args);
   }
 };
 
