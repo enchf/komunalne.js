@@ -35,8 +35,8 @@ Komunalne.test.execute = function(cases,method,test) {
     result = mf.apply(ms, testcase.args);
     
     args.push(result);
-    if (testcase.expected) args.push(testcase.expected);
-    if (testcase.msg) args.push(testcase.msg);
+    if (testcase.expected != undefined) args.push(testcase.expected);
+    if (testcase.msg != undefined) args.push(testcase.msg);
     
     tf.apply(ts, args);
   }

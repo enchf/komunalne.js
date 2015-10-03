@@ -15,10 +15,19 @@ QUnit.test("Komunalne.js unit test executor", function(assert) {
   cases.push({ "args": ["Fake",2], "expected": 2 });
   cases.push({ "args": ["Fake",3], "expected": 3, "msg": "Message" });
   
-  Komunalne.test.execute(cases, { "fn": function(name,i) { return i; } }, { fn: function(a,b,c) {
+  Komunalne.test.execute(cases, function(name,i) { return i; }, { "fn": function(a,b,c) {
     assert.equal(a,arguments.length,"Testing arguments number for object " + i);
     assert.equal(i,a,"Testing execution order " + (i++));
   }});
+  
+  var ignoreOnlyNullOrUndefined = [{ "args": [], "expected": "", "msg": "Call to append without arguments" }];
+  var funct = function(a,b,c) { 
+    assert.equal(arguments.length, 3, "Preventing to avoid skip false-able values ('',false,...)");
+    assert.deepEqual(a,"","Check to prevent skipping empty strings");
+    assert.equal(b,"","Check to prevent skipping empty strings");
+    assert.equal(c,ignoreOnlyNullOrUndefined[0].msg,"Check for third argument");
+  };
+  Komunalne.test.execute(ignoreOnlyNullOrUndefined, function() { return ""; }, funct);
 });
 
 QUnit.test("Komunalne.js currency formatter", function(assert) {
