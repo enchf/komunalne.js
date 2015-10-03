@@ -39,8 +39,8 @@ Komunalne.test.Case = function(args,expected,msg) {
   this.expected = expected;
   this.msg = msg;
 };
-Komunalne.test.Case.prototype.hasExpected = function() { return this.expected != undefined; };
-Komunalne.test.Case.prototype.hasMsg = function() { return this.msg != undefined; };
+Komunalne.test.Case.prototype.hasExpected = function() { return this.expected !== undefined; };
+Komunalne.test.Case.prototype.hasMsg = function() { return this.msg !== undefined; };
 
 /**
  * Suite of testcases.
