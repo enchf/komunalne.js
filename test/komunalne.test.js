@@ -5,69 +5,70 @@ QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne,"Komunalne.js object defined");
   assert.ok(Komunalne.format,"Komunalne.js formatters container defined");
   assert.ok(Komunalne.test,"Komunalne.js unit testing helpers");
+  assert.ok(Komunalne.helper,"Komunalne.js helpers container");
 });
 
 QUnit.test("Komunalne.js unit test executor", function(assert) {
-  var cases = [];
+  var suite = new Komunalne.test.Suite();
   var i = 1;
   
-  cases.push({ "args": ["Fake",1] });
-  cases.push({ "args": ["Fake",2], "expected": 2 });
-  cases.push({ "args": ["Fake",3], "expected": 3, "msg": "Message" });
+  suite.add(["Fake",1]);
+  suite.add(["Fake",2],2);
+  suite.add(["Fake",3],3,"Message");
   
-  Komunalne.test.execute(cases, function(name,i) { return i; }, { "fn": function(a,b,c) {
-    assert.equal(a,arguments.length,"Testing arguments number for object " + i);
-    assert.equal(i,a,"Testing execution order " + (i++));
-  }});
+  Komunalne.test.execute(suite, function(name,i) { return i; }, function(a,b,c) {
+    assert.equal(a,arguments.length,"Arguments number for object " + i);
+    assert.equal(i,a,"Execution order " + (i++));
+  });
   
-  var ignoreOnlyNullOrUndefined = [{ "args": [], "expected": "", "msg": "Call to append without arguments" }];
+  var ignoreOnlyNullOrUndefined = new Komunalne.test.Case([],"","Call to append without arguments");
   var funct = function(a,b,c) { 
     assert.equal(arguments.length, 3, "Preventing to avoid skip false-able values ('',false,...)");
     assert.deepEqual(a,"","Check to prevent skipping empty strings");
     assert.equal(b,"","Check to prevent skipping empty strings");
-    assert.equal(c,ignoreOnlyNullOrUndefined[0].msg,"Check for third argument");
+    assert.equal(c,ignoreOnlyNullOrUndefined.msg,"Check for third argument");
   };
   Komunalne.test.execute(ignoreOnlyNullOrUndefined, function() { return ""; }, funct);
 });
 
 QUnit.test("Komunalne.js currency formatter", function(assert) {
-  var cases = [];
+  var suite = new Komunalne.test.Suite();
   
-  // Testing Integers.
-  cases.push({ "args": [1], "expected": "1.00", "msg": "Testing integer" });
-  cases.push({ "args": [0], "expected": "0.00", "msg": "Testing integer with 0" });
-  cases.push({ "args": [666], "expected": "666.00", "msg": "Testing integer with 3 digits" });
-  cases.push({ "args": [1010], "expected": "1,010.00", "msg": "Testing integer greater than 1000" });
-  cases.push({ "args": [123456789012], "expected": "123,456,789,012.00", "msg": "Testing big integer" });
-  cases.push({ "args": [12345], "expected": "12,345.00", "msg": "Testing integer with 5 digits" });
-  cases.push({ "args": [-0], "expected": "0.00", "msg": "Testing -0" });
-  cases.push({ "args": [-1], "expected": "-1.00", "msg": "Testing negative digit" });
-  cases.push({ "args": [-123], "expected": "-123.00", "msg": "Testing negative with 3 digits" });
-  cases.push({ "args": [-12345], "expected": "-12,345.00", "msg": "Testing negative with 5 digits" });
-  cases.push({ "args": [-123456789012], "expected": "-123,456,789,012.00", "msg": "Testing big negative" });
+  // Integers.
+  suite.add([1],"1.00","Integer");
+  suite.add([0],"0.00","Integer with 0");
+  suite.add([666],"666.00","Integer with 3 digits");
+  suite.add([1010],"1,010.00","Integer greater than 1000");
+  suite.add([123456789012],"123,456,789,012.00","Big integer");
+  suite.add([12345],"12,345.00","Integer with 5 digits");
+  suite.add([-0],"0.00","-0");
+  suite.add([-1],"-1.00","Negative digit");
+  suite.add([-123],"-123.00","Negative with 3 digits");
+  suite.add([-12345],"-12,345.00","Negative with 5 digits");
+  suite.add([-123456789012],"-123,456,789,012.00","Big negative");
   
-  // Testing floats.
-  cases.push({ "args": [1.23], "expected": "1.23", "msg": "Testing float" });
-  cases.push({ "args": [0.01], "expected": "0.01", "msg": "Testing float between 0 and 1" });
-  cases.push({ "args": [-12.34], "expected": "-12.34", "msg": "Testing negative float" });
-  cases.push({ "args": [-12345678.901234], "expected": "-12,345,678.90", "msg": "Testing big negative float" });
-  cases.push({ "args": [1.235], "expected": "1.24", "msg": "Testing rounding up" });
-  cases.push({ "args": [1.234], "expected": "1.23", "msg": "Testing rounding down" });
-  cases.push({ "args": [1.2], "expected": "1.20", "msg": "Testing padding zeros" });
-  cases.push({ "args": [1.999], "expected": "2.00", "msg": "Testing complex rounding up" });
-  cases.push({ "args": [-1.999], "expected": "-2.00", "msg": "Testing negative complex round" });
+  // floats.
+  suite.add([1.23],"1.23","Float");
+  suite.add([0.01],"0.01","Float between 0 and 1");
+  suite.add([-12.34],"-12.34","Negative float");
+  suite.add([-12345678.901234],"-12,345,678.90","Big negative float");
+  suite.add([1.235],"1.24","Rounding up");
+  suite.add([1.234],"1.23","Rounding down");
+  suite.add([1.2],"1.20","Padding zeros");
+  suite.add([1.999],"2.00","Complex rounding up");
+  suite.add([-1.999],"-2.00","Negative complex round");
   
-  // Testing formatter changing default parameters.
-  cases.push({ "args": [1.234444,3], "expected": "1.234", "msg": "Testing 3 decimals round down" });
-  cases.push({ "args": [1.234567,4], "expected": "1.2346", "msg": "Testing 4 decimals round up" });
-  cases.push({ "args": [0.000001,3], "expected": "0.000", "msg": "Testing round down to 0" });
-  cases.push({ "args": [1.2,6], "expected": "1.200000", "msg": "Testing padding zeros" });
-  cases.push({ "args": [1.20019001,4], "expected": "1.2002", "msg": "Testing 4 decimals round up" });
-  cases.push({ "args": [1.23,3,"@"], "expected": "1@230", "msg": "Testing changing decimal separator" });
-  cases.push({ "args": [12345.567,2,"-","="], "expected": "12=345-57", 
-               "msg": "Testing changing both decimal and thousands separators" });
-  cases.push({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65", 
-               "msg": "Lenght > 1 separators" });
+  // formatter changing default parameters.
+  suite.add([1.234444,3],"1.234","3 decimals round down");
+  suite.add([1.234567,4],"1.2346","4 decimals round up");
+  suite.add([0.000001,3],"0.000","Round down to 0");
+  suite.add([1.2,6],"1.200000","Padding zeros");
+  suite.add([1.20019001,4],"1.2002","4 decimals round up");
+  suite.add([1.23,3,"@"],"1@230","Changing decimal separator");
+  suite.add([12345.567,2,"-","="],"12=345-57", 
+              "Changing both decimal and thousands separators");
+  suite.add([12345.6543,2,"$%&","--"],"12--345$%&65", 
+              "Length > 1 separators");
   
-  Komunalne.test.execute(cases, Komunalne.format.currency, { fn: assert.equal, scope: assert });
+  Komunalne.test.execute(suite, Komunalne.format.currency, new Komunalne.helper.Method(assert.equal,assert));
 });

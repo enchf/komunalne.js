@@ -2,43 +2,83 @@
  * Komunalne.js - Javascript utils compilation.
  */
 function Komunalne() {};
-Komunalne.test = {};
+Komunalne.helper = {};
 Komunalne.format = {};
+Komunalne.test = {};
+
+/**
+ * Executor function.
+ * @param method Method to be executed.
+ * @param scope (optional) Method scope.
+ */
+Komunalne.helper.Method = function(method,scope) {
+  this.fn = method;
+  this.scope = scope != undefined ? scope : null;
+};
+Komunalne.helper.Method.prototype.apply = function(args) { return this.fn.apply(this.scope,args); };
+Komunalne.helper.Method.prototype.call = function() { return this.fn.apply(this.scope,arguments); };
+
+Komunalne.helper.Iterator = function(array) {
+  this.i = 0;
+  this.ref = array;
+};
+Komunalne.helper.Iterator.prototype.hasNext = function() { return this.i < this.ref.length; };
+Komunalne.helper.Iterator.prototype.next = function() {
+  if (!this.hasNext()) throw "Iterator index out of bounds: " + this.i;
+  return this.ref[this.i++];
+};
+
+/**
+ * Test case object.
+ * @param args Arguments to be passed to the target function.
+ * @param expected (optional) Expected return value.
+ * @param msg (optional) Test case message.
+ */
+Komunalne.test.Case = function(args,expected,msg) {
+  this.args = args;
+  this.expected = expected;
+  this.msg = msg;
+};
+Komunalne.test.Case.prototype.hasExpected = function() { return this.expected != undefined; };
+Komunalne.test.Case.prototype.hasMsg = function() { return this.msg != undefined; };
+
+/**
+ * Suite of testcases.
+ */
+Komunalne.test.Suite = function(cases) { 
+  this.cases = cases != undefined ? cases : [];
+};
+Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
+Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
+Komunalne.test.Suite.prototype.add = function(args,expected,msg) { 
+  this.cases.push(new Komunalne.test.Case(args,expected,msg));
+};
 
 /**
  * Execute a set of test cases.
- * @param cases An array of test cases. Each element is an object that can have the following properties:
- *   - args (mandatory): The arguments to be passed to the method to be tested. Mandatory.
- *   - expected (optional): If the test function need a comparison object.
- *   - msg (optional): Custom message for the unit test execution.
- *   These arguments are passed in the same order as they are listed to the test method (if they are present).
- * @param method Any of a function or an object with the definition of the method to be tested.
- *   If an object is passed as argument, contains 2 properties:
- *   - fn: The method to be tested.
- *   - scope (optional): Method execution scope, if needed.
- * @param test An object with the definition of the testing method. 
- *   This object should have the same properties as method argument.
- *   When using QUnit.assert object methods, assert object itself should be passed as scope.
+ * @param cases An array of Komunalne.test.Case objects or a Komunalne.test.Suite object. 
+ *   The order in which attributes are passed to the test method is args > expected > msg, as they are present.
+ * @param method A function or a Komunalne.test.Method object.
+ * @param test A function or a Komunalne.test.Method object (in case of QUnit.assert, assert object should be the scope.
  */
 Komunalne.test.execute = function(cases,method,test) {
   var testcase;
   var args;
-  var result;
-  var mf,ms,tf,ts;
-  for (var i in cases) {
-    testcase = cases[i];
+  var iterator;
+  
+  cases = cases instanceof Komunalne.test.Suite ? cases : 
+          new Komunalne.test.Suite(cases instanceof Komunalne.test.Case ? [cases] : cases);
+  method = typeof method == "function" ? new Komunalne.helper.Method(method) : method;
+  test = typeof test == "function" ? new Komunalne.helper.Method(test) : test;
+  iterator = cases.iterator();
+  
+  while (iterator.hasNext()) {
+    testcase = iterator.next();
     args = [];
-    mf = typeof method == "function" ? method : method.fn;
-    ms = typeof method == "function" ? null : (method.scope != undefined ? method.scope : null);
-    tf = typeof test == "function" ? test : test.fn;
-    ts = typeof test == "function" ? null : (test.scope != undefined ? test.scope : null);
-    result = mf.apply(ms, testcase.args);
-    
-    args.push(result);
-    if (testcase.expected != undefined) args.push(testcase.expected);
-    if (testcase.msg != undefined) args.push(testcase.msg);
-    
-    tf.apply(ts, args);
+    args.push(method.apply(testcase.args));
+    if (testcase.hasExpected()) args.push(testcase.expected);
+    if (testcase.hasMsg()) args.push(testcase.msg);
+    test.apply(args);
   }
 };
 
