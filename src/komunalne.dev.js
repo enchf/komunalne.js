@@ -8,6 +8,9 @@ Komunalne.util = {};
 Komunalne.format = {};
 Komunalne.test = {};
 
+/* Shortcut if not defined already */
+if (window.K === undefined) window.K = Komunalne;
+
 /**
  * Executor function.
  * @param method Method to be executed.
@@ -32,6 +35,7 @@ Komunalne.helper.Iterator.prototype.next = function() {
   if (!this.hasNext()) throw "Iterator index out of bounds: " + this.i;
   return this.ref[this.i++];
 };
+
 /**
  * Generates a new string object from concatenating 'app' (appended) string (if present)
  * to 'str' string (if present), being separated by 'sep' (separator) string (if present, otherwise ' ').
@@ -62,6 +66,45 @@ Komunalne.util.path = function(obj,path) {
   return el;
 };
 
+/**
+ * Returns true if the object passed as argument is a Date.
+ * If strict mode is set to true, returns true only if the Date object is valid.
+ * @param date Object to be validated as date.
+ * @param strict True to check the date validity, false to only check the type.
+ */
+Komunalne.util.isDate = function(date,strict) { 
+  return (date instanceof Date) && (!strict || !isNaN(date.valueOf())); 
+};
+
+/**
+ * Returns true if the argument is a function.
+ * @param obj Object to be validated as function.
+ */
+Komunalne.util.isFunction = function(obj) { return typeof obj == "function"; };
+
+/**
+ * Returns true if the object is iterable in a 'for (var x in obj) {}' statement.
+ * @param obj Object to be validated as iterable.
+ */
+Komunalne.util.isIterable = function(obj) { 
+  return typeof obj == "object" && obj != undefined && !K.util.isDate(obj);
+};
+
+/**
+ * Returns true if the object is an Array.
+ * @param obj Object to be validated as an array.
+ */
+Komunalne.util.isArray = function(obj) { 
+  return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
+};
+
+/**
+ * Formats a number as a currency.
+ * @param num Number object. Mandatory to be a number or a parseable number.
+ * @param nd (optional) Number of decimals, default to 2.
+ * @param ds (optional) Decimal separator, default to '.'.
+ * @param ms (optional) Milliard separator, default to ','.
+ */
 Komunalne.format.currency = function(num,nd,ds,ms){
   if (!(typeof num == "number")) throw "Formatting a non-number";
   nd = nd !== "" && nd !== null && !isNaN((nd = Math.abs(nd))) ? nd : 2;
@@ -78,6 +121,13 @@ Komunalne.format.currency = function(num,nd,ds,ms){
   res=neg + ist.substring(0,i) + res;
   return res + (dec.length > 0 ? (ds+dec) : "");
 };
+
+/**
+ * Creates a capitalized string setting the first letter uppercase and the rest to lowercase.
+ * @param str String to be capitalized.
+ */
+Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
+
 
 /**
  * Test case object.

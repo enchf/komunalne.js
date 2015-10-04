@@ -1,3 +1,10 @@
+/**
+ * Formats a number as a currency.
+ * @param num Number object. Mandatory to be a number or a parseable number.
+ * @param nd (optional) Number of decimals, default to 2.
+ * @param ds (optional) Decimal separator, default to '.'.
+ * @param ms (optional) Milliard separator, default to ','.
+ */
 Komunalne.format.currency = function(num,nd,ds,ms){
   if (!(typeof num == "number")) throw "Formatting a non-number";
   nd = nd !== "" && nd !== null && !isNaN((nd = Math.abs(nd))) ? nd : 2;
@@ -14,3 +21,10 @@ Komunalne.format.currency = function(num,nd,ds,ms){
   res=neg + ist.substring(0,i) + res;
   return res + (dec.length > 0 ? (ds+dec) : "");
 };
+
+/**
+ * Creates a capitalized string setting the first letter uppercase and the rest to lowercase.
+ * @param str String to be capitalized.
+ */
+Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
+

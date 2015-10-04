@@ -1,6 +1,26 @@
 /**
- * Komunalne.js tests definition.
+ * Komunalne.js test data and cases definition.
  */
+var testData = {
+  "empty-object": {},
+  "empty-array": [],
+  "null": null,
+  "undefined": undefined,
+  "string": "string",
+  "number": 1,
+  "negative-number": -1,
+  "zero": 0,
+  "floating-point-number": 1.23,
+  "true": true,
+  "false": false,
+  "date": new Date(),
+  "invalid-date": new Date("blblblbl"),
+  "function": function() {}
+};
+
+/* Extend QUnit.assert with a K.helper.Method builder */
+QUnit.assert.method = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
+
 QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne,"Komunalne.js object defined");
   assert.ok(Komunalne.format,"Komunalne.js formatters container defined");
@@ -29,6 +49,71 @@ QUnit.test("Komunalne.js unit test executor", function(assert) {
     assert.equal(c,ignoreOnlyNullOrUndefined.msg,"Check for third argument");
   };
   Komunalne.test.execute(ignoreOnlyNullOrUndefined, function() { return ""; }, funct);
+});
+
+QUnit.test("Append util function", function(assert) {
+  var suite = new Komunalne.test.Suite();
+  
+  suite.add([],"","Call to append without arguments");
+  suite.add([""],"","Call to append with empty string");
+  suite.add(["Str"],"Str","Call to append with single string");
+  suite.add(["A","B"],"A B","Call to append with two strings");
+  suite.add(["A","B","C"],"ACB","Call to append with three strings");
+  suite.add(["A",null],"A","Append null to string");
+  suite.add(["A",null,"C"],"AC","Append null with separator");
+  suite.add([null,"B"],"B","Append string to null");
+  suite.add([null,"B","C"],"CB","Append string to null with separator");
+  
+  Komunalne.test.execute(suite, Komunalne.util.append, assert.method("equal"));
+});
+
+QUnit.test("Path lookup function", function(assert) {
+  var obj = { "a": 1, "b": [1,2,3], "c": "str", "d": { "e": "e", "f": { "g": false }, "h": true }, "i": -1 };
+  var suite = new Komunalne.test.Suite();
+  
+  suite.add([obj,"a"],1,"Test simple path ['a']");
+  suite.add([obj,"d.e"],"e","Test one depth ['d.e']");
+  suite.add([obj,"d.f.g"],false,"Test two depth ['d.f.g']");
+  suite.add([obj,"d.i.f"],null,"Test unreachable path === null");
+  suite.add([obj,"a.b"],null,"Test try to go deep into a non object");
+  
+  Komunalne.test.execute(suite, Komunalne.util.path, assert.method("strictEqual")); 
+});
+
+QUnit.test("Data type util functions", function(assert) {
+  var dateTest = ["date","invalid-date"];
+  var fnTest = ["function"];
+  var dateStrictTest = "date";
+  var iterableTest = ["empty-object","empty-array"];
+  var arrayTest = ["empty-array"];
+  var suite,result,msg;
+  var all = [dateTest,fnTest,iterableTest,arrayTest];
+  var fns = ["isDate","isFunction","isIterable","isArray"];
+  var dataNames = {};
+  
+  for (var obj in testData) {
+    dataNames[obj] = K.format.capitalize(obj.replace("-"," "));
+  }
+  
+  for (var i in all) {
+    suite = new Komunalne.test.Suite();
+    
+    for (var obj in testData) {
+      result = all[i].indexOf(obj) >= 0;
+      msg = dataNames[obj] + " is" + (result ? " " : " not ") + "true for " + fns[i];
+      suite.add([testData[obj]], result, msg); 
+    }
+    
+    Komunalne.test.execute(suite,Komunalne.util[fns[i]],assert.method("strictEqual"));
+  }
+  
+  suite = new Komunalne.test.Suite();
+  for (var obj in testData) {
+    result = obj === dateStrictTest;
+    msg = dataNames[obj] + " is" + (result ? " " : " not ") + "a valid date object";
+    suite.add([testData[obj],true],result,msg);
+  }
+  Komunalne.test.execute(suite,Komunalne.util.isDate,assert.method("strictEqual"));
 });
 
 QUnit.test("Komunalne.js currency formatter", function(assert) {
@@ -70,34 +155,14 @@ QUnit.test("Komunalne.js currency formatter", function(assert) {
   suite.add([12345.6543,2,"$%&","--"],"12--345$%&65", 
               "Length > 1 separators");
   
-  Komunalne.test.execute(suite, Komunalne.format.currency, new Komunalne.helper.Method(assert.equal,assert));
+  Komunalne.test.execute(suite, Komunalne.format.currency, assert.method("equal"));
 });
 
-QUnit.test("Append util function", function(assert) {
+QUnit.test("General testing to format functions", function(assert) {
   var suite = new Komunalne.test.Suite();
   
-  suite.add([],"","Call to append without arguments");
-  suite.add([""],"","Call to append with empty string");
-  suite.add(["Str"],"Str","Call to append with single string");
-  suite.add(["A","B"],"A B","Call to append with two strings");
-  suite.add(["A","B","C"],"ACB","Call to append with three strings");
-  suite.add(["A",null],"A","Append null to string");
-  suite.add(["A",null,"C"],"AC","Append null with separator");
-  suite.add([null,"B"],"B","Append string to null");
-  suite.add([null,"B","C"],"CB","Append string to null with separator");
+  suite.add(["string"],"String","Simple capitalization");
+  suite.add(["sTrInG"],"String","Capitalization of multiple uppercase string letters");
   
-  Komunalne.test.execute(suite, Komunalne.util.append, new Komunalne.helper.Method(assert.equal,assert));
-});
-
-QUnit.test("Path lookup function", function(assert) {
-  var obj = { "a": 1, "b": [1,2,3], "c": "str", "d": { "e": "e", "f": { "g": false }, "h": true }, "i": -1 };
-  var suite = new Komunalne.test.Suite();
-  
-  suite.add([obj,"a"],1,"Test simple path ['a']");
-  suite.add([obj,"d.e"],"e","Test one depth ['d.e']");
-  suite.add([obj,"d.f.g"],false,"Test two depth ['d.f.g']");
-  suite.add([obj,"d.i.f"],null,"Test unreachable path === null");
-  suite.add([obj,"a.b"],null,"Test try to go deep into a non object");
-  
-  Komunalne.test.execute(suite, Komunalne.util.path, new Komunalne.helper.Method(assert.strictEqual,assert)); 
+  Komunalne.test.execute(suite, Komunalne.format.capitalize, assert.method("equal"));
 });

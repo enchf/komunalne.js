@@ -27,3 +27,35 @@ Komunalne.util.path = function(obj,path) {
   }
   return el;
 };
+
+/**
+ * Returns true if the object passed as argument is a Date.
+ * If strict mode is set to true, returns true only if the Date object is valid.
+ * @param date Object to be validated as date.
+ * @param strict True to check the date validity, false to only check the type.
+ */
+Komunalne.util.isDate = function(date,strict) { 
+  return (date instanceof Date) && (!strict || !isNaN(date.valueOf())); 
+};
+
+/**
+ * Returns true if the argument is a function.
+ * @param obj Object to be validated as function.
+ */
+Komunalne.util.isFunction = function(obj) { return typeof obj == "function"; };
+
+/**
+ * Returns true if the object is iterable in a 'for (var x in obj) {}' statement.
+ * @param obj Object to be validated as iterable.
+ */
+Komunalne.util.isIterable = function(obj) { 
+  return typeof obj == "object" && obj != undefined && !K.util.isDate(obj);
+};
+
+/**
+ * Returns true if the object is an Array.
+ * @param obj Object to be validated as an array.
+ */
+Komunalne.util.isArray = function(obj) { 
+  return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
+};
