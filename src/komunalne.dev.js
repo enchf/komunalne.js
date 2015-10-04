@@ -98,6 +98,19 @@ Komunalne.util.isArray = function(obj) {
   return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
 };
 
+Komunalne.util.isInstanceOf = function(obj,type) { return obj instanceof type; };
+
+Komunalne.util.isArrayOf = function(obj) {
+  var is = K.util.isArray(obj);
+  var i = new K.helper.Iterator(obj,type);
+  
+  while (is && i.hasNext()) {
+    is = K.util.isInstanceOf(i.next(),type);
+  }
+  
+  return is;
+};
+
 /**
  * Formats a number as a currency.
  * @param num Number object. Mandatory to be a number or a parseable number.
@@ -142,12 +155,21 @@ Komunalne.test.Case = function(args,expected,msg) {
 };
 Komunalne.test.Case.prototype.hasExpected = function() { return this.expected !== undefined; };
 Komunalne.test.Case.prototype.hasMsg = function() { return this.msg !== undefined; };
+Komunalne.test.Case.prototype.execute = function(method,test) {
+  var args = [];
+  args.push(method.apply(this.args));
+  if (this.hasExpected()) args.push(this.expected);
+  if (this.hasMsg()) args.push(this.msg);
+  test.apply(args);
+};
 
 /**
  * Suite of testcases.
  */
 Komunalne.test.Suite = function(cases) { 
-  this.cases = cases != undefined ? cases : [];
+  this.cases = cases == undefined ? [] :
+    K.util.isArray(cases) ? cases :
+    cases instanceof Komunalne.test.Case ? [cases] : [];
 };
 Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
 Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
@@ -162,23 +184,25 @@ Komunalne.test.Suite.prototype.add = function(args,expected,msg) {
  * @param method A function or a Komunalne.test.Method object.
  * @param test A function or a Komunalne.test.Method object (in case of QUnit.assert, assert object should be the scope.
  */
-Komunalne.test.execute = function(cases,method,test) {
+Komunalne.test.Suite.prototype.execute = function(method,test) {
   var testcase;
   var args;
   var iterator;
   
-  cases = cases instanceof Komunalne.test.Suite ? cases : 
-          new Komunalne.test.Suite(cases instanceof Komunalne.test.Case ? [cases] : cases);
   method = typeof method == "function" ? new Komunalne.helper.Method(method) : method;
   test = typeof test == "function" ? new Komunalne.helper.Method(test) : test;
-  iterator = cases.iterator();
+  iterator = this.iterator();
   
   while (iterator.hasNext()) {
-    testcase = iterator.next();
-    args = [];
-    args.push(method.apply(testcase.args));
-    if (testcase.hasExpected()) args.push(testcase.expected);
-    if (testcase.hasMsg()) args.push(testcase.msg);
-    test.apply(args);
+    iterator.next().execute(method,test);
   }
 };
+
+/**
+ * Extending QUnit.assert to generate a K.helper.Method object.
+ */
+(function() {
+  if (window.QUnit) { 
+    QUnit.assert.buildFor = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
+  }
+})();

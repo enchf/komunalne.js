@@ -18,9 +18,6 @@ var testData = {
   "function": function() {}
 };
 
-/* Extend QUnit.assert with a K.helper.Method builder */
-QUnit.assert.method = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
-
 QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne,"Komunalne.js object defined");
   assert.ok(Komunalne.format,"Komunalne.js formatters container defined");
@@ -36,7 +33,7 @@ QUnit.test("Komunalne.js unit test executor", function(assert) {
   suite.add(["Fake",2],2);
   suite.add(["Fake",3],3,"Message");
   
-  Komunalne.test.execute(suite, function(name,i) { return i; }, function(a,b,c) {
+  suite.execute(function(name,i) { return i; }, function(a,b,c) {
     assert.equal(a,arguments.length,"Arguments number for object " + i);
     assert.equal(i,a,"Execution order " + (i++));
   });
@@ -48,7 +45,9 @@ QUnit.test("Komunalne.js unit test executor", function(assert) {
     assert.equal(b,"","Check to prevent skipping empty strings");
     assert.equal(c,ignoreOnlyNullOrUndefined.msg,"Check for third argument");
   };
-  Komunalne.test.execute(ignoreOnlyNullOrUndefined, function() { return ""; }, funct);
+  ignoreOnlyNullOrUndefined.execute(
+    new Komunalne.helper.Method(function() { return ""; }),
+    new Komunalne.helper.Method(funct));
 });
 
 QUnit.test("Append util function", function(assert) {
@@ -64,7 +63,7 @@ QUnit.test("Append util function", function(assert) {
   suite.add([null,"B"],"B","Append string to null");
   suite.add([null,"B","C"],"CB","Append string to null with separator");
   
-  Komunalne.test.execute(suite, Komunalne.util.append, assert.method("equal"));
+  suite.execute(Komunalne.util.append, assert.buildFor("equal"));
 });
 
 QUnit.test("Path lookup function", function(assert) {
@@ -77,7 +76,7 @@ QUnit.test("Path lookup function", function(assert) {
   suite.add([obj,"d.i.f"],null,"Test unreachable path === null");
   suite.add([obj,"a.b"],null,"Test try to go deep into a non object");
   
-  Komunalne.test.execute(suite, Komunalne.util.path, assert.method("strictEqual")); 
+  suite.execute(Komunalne.util.path, assert.buildFor("strictEqual")); 
 });
 
 QUnit.test("Data type util functions", function(assert) {
@@ -104,7 +103,7 @@ QUnit.test("Data type util functions", function(assert) {
       suite.add([testData[obj]], result, msg); 
     }
     
-    Komunalne.test.execute(suite,Komunalne.util[fns[i]],assert.method("strictEqual"));
+    suite.execute(Komunalne.util[fns[i]],assert.buildFor("strictEqual"));
   }
   
   suite = new Komunalne.test.Suite();
@@ -113,7 +112,7 @@ QUnit.test("Data type util functions", function(assert) {
     msg = dataNames[obj] + " is" + (result ? " " : " not ") + "a valid date object";
     suite.add([testData[obj],true],result,msg);
   }
-  Komunalne.test.execute(suite,Komunalne.util.isDate,assert.method("strictEqual"));
+  suite.execute(Komunalne.util.isDate,assert.buildFor("strictEqual"));
 });
 
 QUnit.test("Komunalne.js currency formatter", function(assert) {
@@ -155,7 +154,7 @@ QUnit.test("Komunalne.js currency formatter", function(assert) {
   suite.add([12345.6543,2,"$%&","--"],"12--345$%&65", 
               "Length > 1 separators");
   
-  Komunalne.test.execute(suite, Komunalne.format.currency, assert.method("equal"));
+  suite.execute(Komunalne.format.currency, assert.buildFor("equal"));
 });
 
 QUnit.test("General testing to format functions", function(assert) {
@@ -164,5 +163,5 @@ QUnit.test("General testing to format functions", function(assert) {
   suite.add(["string"],"String","Simple capitalization");
   suite.add(["sTrInG"],"String","Capitalization of multiple uppercase string letters");
   
-  Komunalne.test.execute(suite, Komunalne.format.capitalize, assert.method("equal"));
+  suite.execute(Komunalne.format.capitalize, assert.buildFor("equal"));
 });

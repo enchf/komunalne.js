@@ -59,3 +59,16 @@ Komunalne.util.isIterable = function(obj) {
 Komunalne.util.isArray = function(obj) { 
   return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
 };
+
+Komunalne.util.isInstanceOf = function(obj,type) { return obj instanceof type; };
+
+Komunalne.util.isArrayOf = function(obj) {
+  var is = K.util.isArray(obj);
+  var i = new K.helper.Iterator(obj,type);
+  
+  while (is && i.hasNext()) {
+    is = K.util.isInstanceOf(i.next(),type);
+  }
+  
+  return is;
+};
