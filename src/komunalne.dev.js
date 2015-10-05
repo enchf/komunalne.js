@@ -98,9 +98,28 @@ Komunalne.util.isArray = function(obj) {
   return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
 };
 
-Komunalne.util.isInstanceOf = function(obj,type) { return obj instanceof type; };
+/**
+ * Checks an object against a specific type.
+ * Scenarios:
+ * - Param 'type' is string: Compares 'obj' as primitive using typeof against 'type'.
+ * - Param 'type' is a function and 'obj' is an object: Uses instanceof operator.
+ * - Param 'type' is a function and 'obj' is not an object: Compares 'obj' as a primitive against 'type' lowercase name.
+ * - Otherwise: Throws exception.
+ */
+Komunalne.util.isInstanceOf = function(obj,type) {
+  var res;
+  if (typeof type == "string") res = (typeof obj == type);
+  else if (K.util.isFunction(type)) {
+    if (typeof obj == "object") res = obj instanceof type;
+    else res = (typeof obj == type.name.toLowerCase());
+  } else throw "Invalid comparison of " + (typeof obj) + " against " + (typeof type);
+  return res;
+};
 
-Komunalne.util.isArrayOf = function(obj) {
+/**
+ * Test whether an array is completely filled with objects of the specified type.
+ */
+Komunalne.util.isArrayOf = function(obj,type) {
   var is = K.util.isArray(obj);
   var i = new K.helper.Iterator(obj,type);
   
