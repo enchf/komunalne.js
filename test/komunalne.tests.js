@@ -18,6 +18,17 @@ var testData = {
   "function": function() {}
 };
 
+var testDataTypes = {
+  "object": { "type": "object", "apply": ["empty-object","empty-array","null","date","invalid-date"] },
+  "Array": { "type": Array, "apply": ["empty-array"] },
+  "undefined": { "type": "undefined", "apply": ["undefined"] },
+  "string": { "type": "string", "apply": ["string"] },
+  "number": { "type": "number", "apply": ["number","negative-number","zero","floating-point-number"] },
+  "boolean": { "type": "boolean", "apply": ["true","false"] },
+  "Date": { "type": Date, "apply": ["date","invalid-date"] },
+  "function": { "type": "function", "apply": ["function"] }
+};
+
 QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne,"Komunalne.js object defined");
   assert.ok(Komunalne.format,"Komunalne.js formatters container defined");
@@ -89,11 +100,13 @@ QUnit.test("Data type util functions", function(assert) {
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
   var dataNames = {};
+  var res;
   
   for (var obj in testData) {
     dataNames[obj] = K.format.capitalize(obj.replace("-"," "));
   }
   
+  // Testing isDate, isFunction, isIterable and isArrray.
   for (var i in all) {
     suite = new Komunalne.test.Suite();
     
@@ -106,6 +119,7 @@ QUnit.test("Data type util functions", function(assert) {
     suite.execute(Komunalne.util[fns[i]],assert.buildFor("strictEqual"));
   }
   
+  // Testing isDate in strict mode.
   suite = new Komunalne.test.Suite();
   for (var obj in testData) {
     result = obj === dateStrictTest;
@@ -113,6 +127,18 @@ QUnit.test("Data type util functions", function(assert) {
     suite.add([testData[obj],true],result,msg);
   }
   suite.execute(Komunalne.util.isDate,assert.buildFor("strictEqual"));
+  
+  // Testing generic isInstanceOf.
+  suite = new Komunalne.test.Suite();
+  for (var typ in testDataTypes) {
+    for (var obj in testData) {
+      res = Komunalne.util.arrayContains(obj,testDataTypes[typ].apply);
+      suite.add([testData[obj],testDataTypes[typ].type], res, 
+                "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type " 
+                + testDataTypes[typ].type.toString());
+    }
+  }
+  suite.execute(Komunalne.util.isInstanceOf,assert.buildFor("strictEqual"));
 });
 
 QUnit.test("Komunalne.js currency formatter", function(assert) {

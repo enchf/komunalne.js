@@ -49,7 +49,7 @@ Komunalne.util.isFunction = function(obj) { return typeof obj == "function"; };
  * @param obj Object to be validated as iterable.
  */
 Komunalne.util.isIterable = function(obj) { 
-  return typeof obj == "object" && obj != undefined && !K.util.isDate(obj);
+  return typeof obj == "object" && obj != undefined && !Komunalne.util.isDate(obj);
 };
 
 /**
@@ -57,37 +57,76 @@ Komunalne.util.isIterable = function(obj) {
  * @param obj Object to be validated as an array.
  */
 Komunalne.util.isArray = function(obj) { 
-  return K.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
+  return Komunalne.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
 };
 
 /**
  * Checks an object against a specific type.
  * Scenarios:
  * - Param 'type' is string: Compares 'obj' as primitive using typeof against 'type'.
- * - Param 'type' is a function and 'obj' is an object: Uses instanceof operator.
- * - Param 'type' is a function and 'obj' is not an object: Compares 'obj' as a primitive against 'type' lowercase name.
+ * - Param 'type' is a function: Uses instanceof operator whatever type is 'obj'.
  * - Otherwise: Throws exception.
  */
 Komunalne.util.isInstanceOf = function(obj,type) {
   var res;
   if (typeof type == "string") res = (typeof obj == type);
-  else if (K.util.isFunction(type)) {
-    if (typeof obj == "object") res = obj instanceof type;
-    else res = (typeof obj == type.name.toLowerCase());
-  } else throw "Invalid comparison of " + (typeof obj) + " against " + (typeof type);
+  else if (Komunalne.util.isFunction(type)) res = obj instanceof type;
+  else throw "Invalid comparison of " + (typeof obj) + " against " + (typeof type);
   return res;
 };
 
 /**
  * Test whether an array is completely filled with objects of the specified type.
+ * Type can be a primitive name (string) or a function object.
  */
 Komunalne.util.isArrayOf = function(obj,type) {
-  var is = K.util.isArray(obj);
-  var i = new K.helper.Iterator(obj,type);
-  
-  while (is && i.hasNext()) {
-    is = K.util.isInstanceOf(i.next(),type);
-  }
-  
+  var is = Komunalne.util.isArray(obj);
+  var i = new Komunalne.helper.Iterator(obj,type);
+  while (is && i.hasNext()) is = Komunalne.util.isInstanceOf(i.next(),type);
   return is;
+};
+
+Komunalne.util.deepEquals = function(a,b) {
+  var ai,bi,ait,bit,an,bn;
+  var equal = true;
+  ai = Komunalne.util.isIterable(a);
+  bi = Komunalne.util.isIterable(b);
+  
+  if (ai && bi) {
+    ait = new Komunalne.helper.Iterator(a);
+    bit = new Komunalne.helper.Iterator(b);
+    equal = ait.length() == bit.length();
+    
+    while (ait.hasNext() && equal) {
+      an = ait.next();
+      bn = bit.next();
+      equal = Komunalne.util.deepEquals(an,bn);
+    }
+  } else equal = (ai == bi && a === b);
+  
+  return equal;
+};
+
+/**
+ * True if the first argument is contained in the second argument array.
+ * @param item Lookup item into the array.
+ * @param array Array to be inspected.
+ * @param deep True to use a deep equals comparing item with array elements.
+ */
+Komunalne.util.arrayContains = function(item,array,deep) {
+  var it,found;
+  if (deep === true) {
+    it = new Komunalne.helper.Iterator(array);
+    found = false;
+    while (it.hasNext() && !found) found = Komunalne.util.deepEquals(item,it.next());
+  } else found = array.indexOf(item) >= 0;
+  return found;
+};
+
+/**
+ * Check if any of the arguments passed correspond to the first one.
+ * Sample: Komunalne.util.isAnyOf(1,5,3,1,2,4) will return true as 1 is part of [5,3,1,2,4].
+ */
+Komunalne.util.isAnyOf = function(item) {
+  return Komunalne.util.arrayContains(item,Array.prototype.slice.call(arguments,1));
 };
