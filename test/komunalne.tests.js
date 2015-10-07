@@ -15,12 +15,14 @@ var testData = {
   "false": false,
   "date": new Date(),
   "invalid-date": new Date("blblblbl"),
-  "function": function() {}
+  "function": function() {},
+  "array": [1,2,3],
+  "object": {"a":1,"b":2,"c":3,d:4}
 };
 
 var testDataTypes = {
-  "object": { "type": "object", "apply": ["empty-object","empty-array","null","date","invalid-date"] },
-  "Array": { "type": Array, "apply": ["empty-array"] },
+  "object": { "type": "object", "apply": ["empty-object","empty-array","null","date","invalid-date","array","object"] },
+  "Array": { "type": Array, "apply": ["empty-array","array"] },
   "undefined": { "type": "undefined", "apply": ["undefined"] },
   "string": { "type": "string", "apply": ["string"] },
   "number": { "type": "number", "apply": ["number","negative-number","zero","floating-point-number"] },
@@ -61,6 +63,59 @@ QUnit.test("Komunalne.js unit test executor", function(assert) {
     new Komunalne.helper.Method(funct));
 });
 
+QUnit.test("Iterator implementation", function(assert) {
+  var a,b,c,d,e,f;
+  
+  a = new Komunalne.helper.Iterator(testData["empty-object"]);
+  b = new Komunalne.helper.Iterator(testData.object);
+  c = new Komunalne.helper.Iterator(testData["empty-array"]);
+  d = new Komunalne.helper.Iterator(testData.array);
+  e = new Komunalne.helper.Iterator(testData.object);
+  f = new Komunalne.helper.Iterator(testData.array);
+  
+  // Wrapper for the exception tests.
+  var wrapper = function(iterator) { return function() { iterator.next(); }; };
+  
+  assert.strictEqual(a.hasNext(),false,"No next item on empty object");
+  assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
+  assert.strictEqual(c.hasNext(),false,"No next item on empty array");
+  assert.strictEqual(d.hasNext(),true,"Non empty array has next item");
+  
+  assert.strictEqual(a.length(),0,"Length of empty object is 0");
+  assert.strictEqual(b.length(),4,"Length of test data object");
+  assert.strictEqual(c.length(),0,"Length of empty array is 0");
+  assert.strictEqual(d.length(),3,"Length of test array");
+  
+  assert.strictEqual(b.next(),1,"First item retrieval on object iterator");
+  assert.strictEqual(d.next(),1,"First item retrieval on array iterator");
+  
+  assert.strictEqual(b.remaining(),3,"Remaining function working properly on object iterator");
+  assert.strictEqual(d.remaining(),2,"Remaining function working properly on array iterator");
+  assert.strictEqual(b.length(),4,"Length unchanged after moving forward on object iterator");
+  assert.strictEqual(d.length(),3,"Length unchanged after moving forward on array iterator");
+  assert.strictEqual(e.remaining(),4,"Iterator created with same object unchanged after move forward");
+  assert.strictEqual(f.remaining(),3,"Iterator created with same array unchanged after move forward");
+  
+  assert.throws(wrapper(a),"Iterator index out of bounds: 0","Exception thrown calling next on empty object iterator");
+  assert.throws(wrapper(c),"Iterator index out of bounds: 0","Exception thrown calling next on empty array iterator");
+  b.next(); b.next();
+  assert.strictEqual(b.remaining(),1,"Remaining working after sucessive calls to next on object iterator");
+  assert.strictEqual(b.next(),4,"Retrieving the last item on object iterator");
+  assert.throws(wrapper(b),"Iterator index out of bounds: 4","Exception thrown after exhausting object iterator");
+  assert.strictEqual(b.length(),4,"Length unchanged after exhausting object iterator");
+  assert.strictEqual(b.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted object iterator");
+  assert.strictEqual(b.hasNext(),false,"No next element on exhausted object iterator");
+  assert.strictEqual(e.next(),1,"Iterator created with same object working after exhausting the other one");
+  d.next();
+  assert.strictEqual(d.remaining(),1,"Remaining working after sucessive calls to next on array iterator");
+  assert.strictEqual(d.next(),3,"Retrieving the last item on array iterator");
+  assert.throws(wrapper(d),"Iterator index out of bounds: 3","Exception thrown after exhausting array iterator");
+  assert.strictEqual(d.length(),3,"Length unchanged after exhausting array iterator");
+  assert.strictEqual(d.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted array iterator");
+  assert.strictEqual(d.hasNext(),false,"No next element on exhausted array iterator");
+  assert.strictEqual(f.next(),1,"Iterator created with same array working after exhausting the other one");
+});
+
 QUnit.test("Append util function", function(assert) {
   var suite = new Komunalne.test.Suite();
   
@@ -94,8 +149,8 @@ QUnit.test("Data type util functions", function(assert) {
   var dateTest = ["date","invalid-date"];
   var fnTest = ["function"];
   var dateStrictTest = "date";
-  var iterableTest = ["empty-object","empty-array"];
-  var arrayTest = ["empty-array"];
+  var iterableTest = ["empty-object","empty-array","object","array"];
+  var arrayTest = ["empty-array","array"];
   var suite,result,msg;
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
@@ -103,7 +158,7 @@ QUnit.test("Data type util functions", function(assert) {
   var res;
   
   for (var obj in testData) {
-    dataNames[obj] = K.format.capitalize(obj.replace("-"," "));
+    dataNames[obj] = Komunalne.format.capitalize(obj.replace("-"," "));
   }
   
   // Testing isDate, isFunction, isIterable and isArrray.

@@ -24,7 +24,7 @@ Komunalne.test.Case.prototype.execute = function(method,test) {
  */
 Komunalne.test.Suite = function(cases) { 
   this.cases = cases == undefined ? [] :
-    K.util.isArray(cases) ? cases :
+    Komunalne.util.isArray(cases) ? cases :
     cases instanceof Komunalne.test.Case ? [cases] : [];
 };
 Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
@@ -32,6 +32,7 @@ Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.help
 Komunalne.test.Suite.prototype.add = function(args,expected,msg) { 
   this.cases.push(new Komunalne.test.Case(args,expected,msg));
 };
+Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
 
 /**
  * Execute a set of test cases.
