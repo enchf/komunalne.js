@@ -291,6 +291,35 @@ QUnit.test("Deep equals", function(assert) {
   suite.execute(Komunalne.util.deepEquals,assert.buildFor("strictEqual"));
 });
 
+QUnit.test("Array lookup functions (array contains and is any of?)", function(assert) {
+  var suite = new Komunalne.test.Suite();
+  var aux;
+  suite.add([1,[1,2,3]],true,"Lookup for existing element");
+  suite.add([0,[1,2,3]],false,"Lookup for non existing element");
+  suite.add([new T(),[new T(),new T()]],false,"Lookup for objects but not exactly the same instance");
+  suite.add([(aux=new T()),[new T(),aux,new T()]],true,"Lookup for objects where is present the same instance");
+  suite.add([new T(),[new T(),new T()],true],true,"Lookup for equally objects using deep equals flag");
+  suite.add([new T(),[new T(),new T()],"true"],false,"Lookup for equally objects using non strict deep equals flag");
+  suite.add([{a:1},[{c:{a:1}},2,""],true],false,"Lookup for unexisting object");
+  suite.add([{a:1},[{a:2},{a:1},{a:3}]],false,"Lookup for existing object without deep equals flag");
+  suite.add([{a:1},[{a:2},{a:1},{a:3}],true],true,"Lookup for existing object with deep equals flag");
+  suite.add([[1,2],[[1,3],[1,2]],true],true,"Lookup for arrays with deep equals flag");
+  suite.add([[1,2],[[1,3],[1,2]]],false,"Lookup for arrays without deep equals flag");
+  suite.add([(aux=[1,2]),[[1,3],[1,2],aux]],true,"Lookup for exactly array instance without deep equals flag");
+  suite.execute(Komunalne.util.arrayContains,assert.buildFor("strictEqual"));
+  
+  suite = new Komunalne.test.Suite();
+  suite.add([1,2,3,4,1,5],true,"Lookup for existing integer in arguments list");
+  suite.add([0,2,3,4,1,5],false,"Lookup for non existing integer in arguments list");
+  suite.add(["1",2,3,"4",1,"1",5],true,"Lookup in mixed-type array for existing element");
+  suite.add(["1",2,3,"4",1,5],false,"Lookup in mixed-type array for non-exactly-the-same-type element");
+  suite.add([new T(),new T(),new U(),new T()],false,"Lookup for objects but not the same instance");
+  suite.add([(aux=new U()),new T(),new U(),aux,new T()],true,"Lookup for the same instance objects");
+  suite.add([[1,2],[1,3],[1,2],[1,4]],false,"Lookup for arrays but not the same instance");
+  suite.add([(aux=[1,2]),[1,3],aux,[1,2],[1,4]],true,"Lookup for the same instance array");
+  suite.execute(Komunalne.util.isAnyOf,assert.buildFor("strictEqual"));
+});
+
 QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
   
