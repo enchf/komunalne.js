@@ -87,11 +87,10 @@ Komunalne.util.isArrayOf = function(obj,type) {
 };
 
 /**
- * Checks if both arguments are objects and of the same class.
+ * Checks if both arguments are of the same class.
  */
 Komunalne.util.areSameClass = function(a,b) {
-  return Komunalne.util.isInstanceOf(a,"object") && 
-         Komunalne.util.isInstanceOf(b,"object") && a.constructor === b.constructor;
+  return (typeof a) == (typeof b) && ((typeof a == "object") ? a.constructor === b.constructor : true);
 };
 
 /**

@@ -1,6 +1,9 @@
 /**
- * Komunalne.js test data and cases definition.
+ * Komunalne.js test data.
  */
+var T = function(){};
+var U = function(){};
+
 var testData = {
   "empty-object": {},
   "empty-array": [],
@@ -17,7 +20,9 @@ var testData = {
   "invalid-date": new Date("blblblbl"),
   "function": function() {},
   "array": [1,2,3],
-  "object": {"a":1,"b":2,"c":3,"d":4}
+  "object": {"a":1,"b":2,"c":3,"d":4},
+  "t": new T(),
+  "u": new U()
 };
 
 var dataNames = {};
@@ -29,15 +34,22 @@ var dataNames = {};
 })();
 
 var testDataTypes = {
-  "object": { "type": "object", "apply": ["empty-object","empty-array","null","date","invalid-date","array","object"] },
+  "object": { "type": "object", "apply": 
+             ["t","u","empty-object","empty-array","null","date","invalid-date","array","object"] },
   "Array": { "type": Array, "apply": ["empty-array","array"] },
   "undefined": { "type": "undefined", "apply": ["undefined"] },
   "string": { "type": "string", "apply": ["string"] },
   "number": { "type": "number", "apply": ["number","negative-number","zero","floating-point-number"] },
   "boolean": { "type": "boolean", "apply": ["true","false"] },
   "Date": { "type": Date, "apply": ["date","invalid-date"] },
-  "function": { "type": "function", "apply": ["function"] }
+  "function": { "type": "function", "apply": ["function"] },
+  "custom": { "type": T, "apply": ["t"] },
+  "custom-2": { "type": U, "apply": ["u"] }
 };
+
+/***************************
+ * Komunalne.js test cases.
+ ***************************/
 
 QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne,"Komunalne.js object defined");
@@ -170,10 +182,10 @@ QUnit.test("Path lookup function", function(assert) {
   suite.execute(Komunalne.util.path, assert.buildFor("strictEqual")); 
 });
 
-QUnit.test("Date, Function, Iterable and Array test type functions", function(assert) {
+QUnit.test("Date, Function, Iterable and Array type test functions", function(assert) {
   var dateTest = ["date","invalid-date"];
   var fnTest = ["function"];
-  var iterableTest = ["empty-object","empty-array","object","array"];
+  var iterableTest = ["empty-object","empty-array","object","array","t","u"];
   var arrayTest = ["empty-array","array"];
   var suite,result,msg;
   var all = [dateTest,fnTest,iterableTest,arrayTest];
@@ -192,7 +204,7 @@ QUnit.test("Date, Function, Iterable and Array test type functions", function(as
   }
 });
 
-QUnit.test("Date test type in strict mode", function(assert) {
+QUnit.test("Date type test in strict mode", function(assert) {
   var suite = new Komunalne.test.Suite();
   var result,msg;
   var dateStrictTest = "date";
@@ -205,7 +217,7 @@ QUnit.test("Date test type in strict mode", function(assert) {
   suite.execute(Komunalne.util.isDate,assert.buildFor("strictEqual"));
 });
 
-QUnit.test("Is instance of test type", function(assert) {
+QUnit.test("Is instance of type test", function(assert) {
   var suite = new Komunalne.test.Suite();
   var res;
   for (var typ in testDataTypes) {
@@ -219,12 +231,8 @@ QUnit.test("Is instance of test type", function(assert) {
   suite.execute(Komunalne.util.isInstanceOf,assert.buildFor("strictEqual"));
 });
 
-QUnit.test("Array search functions", function(assert) {
-  var suite;
-  var T = function(){};
-  var U = function(){};
-  
-  suite = new Komunalne.test.Suite();
+QUnit.test("Is Array of search", function(assert) {
+  var suite = new Komunalne.test.Suite();
   suite.add([[1,2,3],"number"],true,"Full numbers array");
   suite.add([[1,2,true,3],"number"],false,"Partial numbers array");
   suite.add([[1,2,3],"string"],false,"Wrong type comparison");
@@ -235,8 +243,26 @@ QUnit.test("Array search functions", function(assert) {
   suite.add([[[],[]],Array],true,"Array of arrays");
   suite.add([{},"number"],false,"Not array passed as argument");
   suite.execute(Komunalne.util.isArrayOf,assert.buildFor("strictEqual"));
-  
-  suite = new Komunalne.test.Suite();
+});
+
+QUnit.test("Are of same class? comparison", function(assert) {
+  var suite = new Komunalne.test.Suite();
+  var data = { 
+    "number": 1, "boolean": true, "string": "str", "object":{}, "array": [1,2], "function": T, "t": new T(), "u": new U() 
+  };
+  var data2 = {
+    "number": 2, "boolean": false, "string": "", "object":{a:1}, "array": [], "function": U, "t": new T(), "u": new U()
+  };
+  for (var x in data) {
+    for (var y in data2) {
+      suite.add([data[x],data2[y]],x == y,"Comparison between " + x + " and " + y + ": " + (x == y));
+    }
+  }
+  suite.execute(Komunalne.util.areSameClass,assert.buildFor("strictEqual"));
+});
+
+QUnit.test("Deep equals", function(assert) {
+  var suite = new Komunalne.test.Suite();
   suite.add([testData.array,testData.array],true,"Equal arrays comparison");
   suite.add([[1,2,3],[3,2,1]],false,"Comparing reversed arrays");
   suite.add([[1,2,3,4],[1,2,3]],false,"Comparing almost equal arrays");
