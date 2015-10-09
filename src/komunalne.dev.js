@@ -29,7 +29,7 @@ Komunalne.helper.Method.prototype.call = function() { return this.fn.apply(this.
 Komunalne.helper.Iterator = function(object) {
   this.keys = [];
   this.i = 0;
-  this.ref = object;
+  this.ref = (object || []);
   for (var x in object) this.keys.push(x);
 };
 Komunalne.helper.Iterator.keyError = "Iterator has not started to retrieve elements";
@@ -193,6 +193,15 @@ Komunalne.util.isAnyOf = function(item) {
   return Komunalne.util.arrayContains(item,Array.prototype.slice.call(arguments,1));
 };
 
+/**
+ * Concatenate the arrays passed as arguments into a new array object.
+ */
+Komunalne.util.arrayConcat = function() {
+  var arr = [];
+  var i = new Komunalne.helper.Iterator(arguments);
+  while (i.hasNext()) arr = arr.concat(i.next());
+  return arr;
+};
 /**
  * Formats a number as a currency.
  * @param num Number object. Mandatory to be a number or a parseable number.

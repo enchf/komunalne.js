@@ -144,3 +144,13 @@ Komunalne.util.arrayContains = function(item,array,deep) {
 Komunalne.util.isAnyOf = function(item) {
   return Komunalne.util.arrayContains(item,Array.prototype.slice.call(arguments,1));
 };
+
+/**
+ * Concatenate the arrays passed as arguments into a new array object.
+ */
+Komunalne.util.arrayConcat = function() {
+  var arr = [];
+  var i = new Komunalne.helper.Iterator(arguments);
+  while (i.hasNext()) arr = arr.concat(i.next());
+  return arr;
+};

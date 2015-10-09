@@ -85,7 +85,9 @@ QUnit.test("Unit test executor", function(assert) {
 });
 
 QUnit.test("Iterator implementation", function(assert) {
-  var a,b,c,d,e,f;
+  var a,b,c,d,e,f,g,h;
+  var nextError = Komunalne.helper.Iterator.nextError;
+  var keyError = Komunalne.helper.Iterator.keyError;
   
   a = new Komunalne.helper.Iterator(testData["empty-object"]);
   b = new Komunalne.helper.Iterator(testData.object);
@@ -93,6 +95,8 @@ QUnit.test("Iterator implementation", function(assert) {
   d = new Komunalne.helper.Iterator(testData.array);
   e = new Komunalne.helper.Iterator(testData.object);
   f = new Komunalne.helper.Iterator(testData.array);
+  g = new Komunalne.helper.Iterator();
+  h = (function() { return new Komunalne.helper.Iterator(arguments); })(4,5,6);
   
   // Wrapper for the exception tests.
   var wrapper = function(iterator) { return function() { iterator.next(); }; };
@@ -102,11 +106,15 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
   assert.strictEqual(c.hasNext(),false,"No next item on empty array");
   assert.strictEqual(d.hasNext(),true,"Non empty array has next item");
+  assert.strictEqual(g.hasNext(),false,"No next item on empty arguments iterator");
+  assert.strictEqual(h.hasNext(),true,"Arguments iterator has next item");
   
   assert.strictEqual(a.length(),0,"Length of empty object is 0");
   assert.strictEqual(b.length(),4,"Length of test data object");
   assert.strictEqual(c.length(),0,"Length of empty array is 0");
   assert.strictEqual(d.length(),3,"Length of test array");
+  assert.strictEqual(g.length(),0,"Length of empty arguments iterator is 0");
+  assert.strictEqual(h.length(),3,"Length of arguments iterator");
   
   assert.throws(keyWrapper(a),Komunalne.helper.Iterator.keyError,
                 "Exception calling currenty key before next, empty object iterator");
@@ -116,27 +124,35 @@ QUnit.test("Iterator implementation", function(assert) {
                 "Exception calling currenty key before next, empty array iterator");
   assert.throws(keyWrapper(d),Komunalne.helper.Iterator.keyError,
                 "Exception calling currenty key before next, array iterator");
+  assert.throws(keyWrapper(g),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, empty arguments iterator");
+  assert.throws(keyWrapper(h),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, arguments iterator");
   
   assert.strictEqual(b.next(),1,"First item retrieval on object iterator");
   assert.equal(b.currentKey(),"a","First item key on object iterator");
   assert.strictEqual(d.next(),1,"First item retrieval on array iterator");
   assert.equal(d.currentKey(),0,"First item key on array iterator");
+  assert.strictEqual(h.next(),4,"First item retrieval on arguments iterator");
+  assert.equal(h.currentKey(),0,"First item key on array iterator");
   
   assert.strictEqual(b.remaining(),3,"Remaining function working properly on object iterator");
   assert.strictEqual(d.remaining(),2,"Remaining function working properly on array iterator");
   assert.strictEqual(b.length(),4,"Length unchanged after moving forward on object iterator");
   assert.strictEqual(d.length(),3,"Length unchanged after moving forward on array iterator");
+  assert.strictEqual(h.length(),3,"Length unchanged after moving forward on arguments iterator");
   assert.strictEqual(e.remaining(),4,"Iterator created with same object unchanged after move forward");
   assert.strictEqual(f.remaining(),3,"Iterator created with same array unchanged after move forward");
   
-  assert.throws(wrapper(a),"Iterator index out of bounds: 0","Exception thrown calling next on empty object iterator");
-  assert.throws(wrapper(c),"Iterator index out of bounds: 0","Exception thrown calling next on empty array iterator");
+  assert.throws(wrapper(a),nextError + "0","Exception thrown calling next on empty object iterator");
+  assert.throws(wrapper(c),nextError + "0","Exception thrown calling next on empty array iterator");
+  assert.throws(wrapper(g),nextError + "0","Exception thrown calling next on empty array iterator");
   b.next(); b.next();
   assert.strictEqual(b.remaining(),1,"Remaining working after sucessive calls to next on object iterator");
   assert.equal(b.currentKey(),"c","Key before last call of next on object iterator");
   assert.strictEqual(b.next(),4,"Retrieving the last item on object iterator");
   assert.equal(b.currentKey(),"d","Last key of object iterator");
-  assert.throws(wrapper(b),"Iterator index out of bounds: 4","Exception thrown after exhausting object iterator");
+  assert.throws(wrapper(b),nextError + "4","Exception thrown after exhausting object iterator");
   assert.strictEqual(b.length(),4,"Length unchanged after exhausting object iterator");
   assert.strictEqual(b.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted object iterator");
   assert.strictEqual(b.hasNext(),false,"No next element on exhausted object iterator");
@@ -146,11 +162,20 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.equal(d.currentKey(),1,"Key before last call of next on array iterator");
   assert.strictEqual(d.next(),3,"Retrieving the last item on array iterator");
   assert.equal(d.currentKey(),2,"Key before last call of next on array iterator");
-  assert.throws(wrapper(d),"Iterator index out of bounds: 3","Exception thrown after exhausting array iterator");
+  assert.throws(wrapper(d),nextError + "3","Exception thrown after exhausting array iterator");
   assert.strictEqual(d.length(),3,"Length unchanged after exhausting array iterator");
   assert.strictEqual(d.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted array iterator");
   assert.strictEqual(d.hasNext(),false,"No next element on exhausted array iterator");
   assert.strictEqual(f.next(),1,"Iterator created with same array working after exhausting the other one");
+  h.next();
+  assert.strictEqual(h.remaining(),1,"Remaining working after sucessive calls to next on arguments iterator");
+  assert.equal(h.currentKey(),1,"Key before last call of next on arguments iterator");
+  assert.strictEqual(h.next(),6,"Retrieving the last item on arguments iterator");
+  assert.equal(h.currentKey(),2,"Key before last call of next on arguments iterator");
+  assert.throws(wrapper(h),nextError + "3","Exception thrown after exhausting arguments iterator");
+  assert.strictEqual(h.length(),3,"Length unchanged after exhausting arguments iterator");
+  assert.strictEqual(h.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted arguments iterator");
+  assert.strictEqual(h.hasNext(),false,"No next element on exhausted arguments iterator");
 });
 
 QUnit.test("Append util function", function(assert) {
@@ -318,6 +343,15 @@ QUnit.test("Array lookup functions (array contains and is any of?)", function(as
   suite.add([[1,2],[1,3],[1,2],[1,4]],false,"Lookup for arrays but not the same instance");
   suite.add([(aux=[1,2]),[1,3],aux,[1,2],[1,4]],true,"Lookup for the same instance array");
   suite.execute(Komunalne.util.isAnyOf,assert.buildFor("strictEqual"));
+});
+
+QUnit.test("Array concatenation", function(assert) {
+  var a=[1,2,3], b=[4,5,6], c=[7,8,9,0], d;
+  assert.deepEqual(Komunalne.util.arrayConcat(),[],"Empty concatenation");
+  assert.deepEqual((d=Komunalne.util.arrayConcat(a,b,c)),[1,2,3,4,5,6,7,8,9,0],"Array concatenation");
+  assert.equal(a.length,3,"Concatenated arrays not affected");
+  d[1]=100;
+  assert.equal(a[1],2,"Concatenated arrays not affected after modifying resulting array");
 });
 
 QUnit.test("Currency formatter", function(assert) {

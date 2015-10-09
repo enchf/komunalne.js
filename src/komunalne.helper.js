@@ -16,7 +16,7 @@ Komunalne.helper.Method.prototype.call = function() { return this.fn.apply(this.
 Komunalne.helper.Iterator = function(object) {
   this.keys = [];
   this.i = 0;
-  this.ref = object;
+  this.ref = (object || []);
   for (var x in object) this.keys.push(x);
 };
 Komunalne.helper.Iterator.keyError = "Iterator has not started to retrieve elements";
