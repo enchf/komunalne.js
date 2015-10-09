@@ -20,6 +20,14 @@ var testData = {
   "object": {"a":1,"b":2,"c":3,"d":4}
 };
 
+var dataNames = {};
+
+(function() {
+  for (var obj in testData) {
+    dataNames[obj] = Komunalne.format.capitalize(obj.replace("-"," "));
+  }
+})();
+
 var testDataTypes = {
   "object": { "type": "object", "apply": ["empty-object","empty-array","null","date","invalid-date","array","object"] },
   "Array": { "type": Array, "apply": ["empty-array","array"] },
@@ -162,23 +170,15 @@ QUnit.test("Path lookup function", function(assert) {
   suite.execute(Komunalne.util.path, assert.buildFor("strictEqual")); 
 });
 
-QUnit.test("Data type util functions", function(assert) {
+QUnit.test("Date, Function, Iterable and Array test type functions", function(assert) {
   var dateTest = ["date","invalid-date"];
   var fnTest = ["function"];
-  var dateStrictTest = "date";
   var iterableTest = ["empty-object","empty-array","object","array"];
   var arrayTest = ["empty-array","array"];
   var suite,result,msg;
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
-  var dataNames = {};
-  var res;
   
-  for (var obj in testData) {
-    dataNames[obj] = Komunalne.format.capitalize(obj.replace("-"," "));
-  }
-  
-  // Testing isDate, isFunction, isIterable and isArrray.
   for (var i in all) {
     suite = new Komunalne.test.Suite();
     
@@ -190,18 +190,24 @@ QUnit.test("Data type util functions", function(assert) {
     
     suite.execute(Komunalne.util[fns[i]],assert.buildFor("strictEqual"));
   }
+});
+
+QUnit.test("Date test type in strict mode", function(assert) {
+  var suite = new Komunalne.test.Suite();
+  var result,msg;
+  var dateStrictTest = "date";
   
-  // Testing isDate in strict mode.
-  suite = new Komunalne.test.Suite();
   for (var obj in testData) {
     result = obj === dateStrictTest;
     msg = dataNames[obj] + " is" + (result ? " " : " not ") + "a valid date object";
     suite.add([testData[obj],true],result,msg);
   }
   suite.execute(Komunalne.util.isDate,assert.buildFor("strictEqual"));
-  
-  // Testing generic isInstanceOf.
-  suite = new Komunalne.test.Suite();
+});
+
+QUnit.test("Is instance of test type", function(assert) {
+  var suite = new Komunalne.test.Suite();
+  var res;
   for (var typ in testDataTypes) {
     for (var obj in testData) {
       res = Komunalne.util.arrayContains(obj,testDataTypes[typ].apply);
