@@ -86,13 +86,27 @@ Komunalne.util.isArrayOf = function(obj,type) {
   return is;
 };
 
+/**
+ * Checks if both arguments are objects and of the same class.
+ */
+Komunalne.util.areSameClass = function(a,b) {
+  return Komunalne.util.isInstanceOf(a,"object") && 
+         Komunalne.util.isInstanceOf(b,"object") && a.constructor === b.constructor;
+};
+
+/**
+ * Do a deep equality test on the arguments.
+ * The arguments should be equals in type, constructor (if they are objects), and:
+ * - If they are objects, the same keys in the same defined order.
+ * - If they are arrays, the same elements in the same position.
+ */
 Komunalne.util.deepEquals = function(a,b) {
   var ai,bi,ait,bit,an,bn;
   var equal = true;
   ai = Komunalne.util.isIterable(a);
   bi = Komunalne.util.isIterable(b);
   
-  if (ai && bi && a.constructor.name === b.constructor.name) {
+  if (ai && bi && (equal = Komunalne.util.areSameClass(a,b))) {
     ait = new Komunalne.helper.Iterator(a);
     bit = new Komunalne.helper.Iterator(b);
     equal = ait.length() == bit.length();

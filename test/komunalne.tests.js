@@ -254,6 +254,8 @@ QUnit.test("Array search functions", function(assert) {
   suite.add([{"a":[1,2,3],"b":{b:1}},{"a":[1,2,3],"b":{a:1}}],false,"Objects unequal in key name");
   suite.add([{"a":[1,2,3,4],"b":{b:1}},{"a":[1,2,3],"b":{b:1}}],false,"Objects unequal in array content");
   suite.add([{"a":{b:2},"b":[1,2,3]},{"a":[1,2,3],"b":{b:2}}],false,"Objects unequal in element order");
+  suite.add([new T(),new T()],true,"Equal objects of custom types");
+  suite.add([new U(),new T()],false,"Equal objects but of different custom type");
   suite.execute(Komunalne.util.deepEquals,assert.buildFor("strictEqual"));
 });
 
