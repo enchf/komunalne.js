@@ -17,7 +17,7 @@ var testData = {
   "invalid-date": new Date("blblblbl"),
   "function": function() {},
   "array": [1,2,3],
-  "object": {"a":1,"b":2,"c":3,d:4}
+  "object": {"a":1,"b":2,"c":3,"d":4}
 };
 
 var testDataTypes = {
@@ -36,9 +36,10 @@ QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne.format,"Komunalne.js formatters container defined");
   assert.ok(Komunalne.test,"Komunalne.js unit testing helpers");
   assert.ok(Komunalne.helper,"Komunalne.js helpers container");
+  assert.ok(Komunalne.test,"Komunalne.js test container");
 });
 
-QUnit.test("Komunalne.js unit test executor", function(assert) {
+QUnit.test("Unit test executor", function(assert) {
   var suite = new Komunalne.test.Suite();
   var i = 1;
   
@@ -75,6 +76,7 @@ QUnit.test("Iterator implementation", function(assert) {
   
   // Wrapper for the exception tests.
   var wrapper = function(iterator) { return function() { iterator.next(); }; };
+  var keyWrapper = function(iterator) { return function() { iterator.currentKey(); }; };
   
   assert.strictEqual(a.hasNext(),false,"No next item on empty object");
   assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
@@ -86,8 +88,19 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(c.length(),0,"Length of empty array is 0");
   assert.strictEqual(d.length(),3,"Length of test array");
   
+  assert.throws(keyWrapper(a),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, empty object iterator");
+  assert.throws(keyWrapper(b),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, object iterator");
+  assert.throws(keyWrapper(c),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, empty array iterator");
+  assert.throws(keyWrapper(d),Komunalne.helper.Iterator.keyError,
+                "Exception calling currenty key before next, array iterator");
+  
   assert.strictEqual(b.next(),1,"First item retrieval on object iterator");
+  assert.equal(b.currentKey(),"a","First item key on object iterator");
   assert.strictEqual(d.next(),1,"First item retrieval on array iterator");
+  assert.equal(d.currentKey(),0,"First item key on array iterator");
   
   assert.strictEqual(b.remaining(),3,"Remaining function working properly on object iterator");
   assert.strictEqual(d.remaining(),2,"Remaining function working properly on array iterator");
@@ -100,7 +113,9 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.throws(wrapper(c),"Iterator index out of bounds: 0","Exception thrown calling next on empty array iterator");
   b.next(); b.next();
   assert.strictEqual(b.remaining(),1,"Remaining working after sucessive calls to next on object iterator");
+  assert.equal(b.currentKey(),"c","Key before last call of next on object iterator");
   assert.strictEqual(b.next(),4,"Retrieving the last item on object iterator");
+  assert.equal(b.currentKey(),"d","Last key of object iterator");
   assert.throws(wrapper(b),"Iterator index out of bounds: 4","Exception thrown after exhausting object iterator");
   assert.strictEqual(b.length(),4,"Length unchanged after exhausting object iterator");
   assert.strictEqual(b.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted object iterator");
@@ -108,7 +123,9 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(e.next(),1,"Iterator created with same object working after exhausting the other one");
   d.next();
   assert.strictEqual(d.remaining(),1,"Remaining working after sucessive calls to next on array iterator");
+  assert.equal(d.currentKey(),1,"Key before last call of next on array iterator");
   assert.strictEqual(d.next(),3,"Retrieving the last item on array iterator");
+  assert.equal(d.currentKey(),2,"Key before last call of next on array iterator");
   assert.throws(wrapper(d),"Iterator index out of bounds: 3","Exception thrown after exhausting array iterator");
   assert.strictEqual(d.length(),3,"Length unchanged after exhausting array iterator");
   assert.strictEqual(d.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted array iterator");
@@ -196,7 +213,51 @@ QUnit.test("Data type util functions", function(assert) {
   suite.execute(Komunalne.util.isInstanceOf,assert.buildFor("strictEqual"));
 });
 
-QUnit.test("Komunalne.js currency formatter", function(assert) {
+QUnit.test("Array search functions", function(assert) {
+  var suite;
+  var T = function(){};
+  var U = function(){};
+  
+  suite = new Komunalne.test.Suite();
+  suite.add([[1,2,3],"number"],true,"Full numbers array");
+  suite.add([[1,2,true,3],"number"],false,"Partial numbers array");
+  suite.add([[1,2,3],"string"],false,"Wrong type comparison");
+  suite.add([[],"string"],true,"Empty array qualifies as array of any type");
+  suite.add([[new T(),new T()],T],true,"Array of custom types");
+  suite.add([[new T(),new U(),new T()],T],false,"Array of custom types intermixed");
+  suite.add([[new T(),new T()],"object"],true,"Array of custom types against object");
+  suite.add([[[],[]],Array],true,"Array of arrays");
+  suite.add([{},"number"],false,"Not array passed as argument");
+  suite.execute(Komunalne.util.isArrayOf,assert.buildFor("strictEqual"));
+  
+  suite = new Komunalne.test.Suite();
+  suite.add([testData.array,testData.array],true,"Equal arrays comparison");
+  suite.add([[1,2,3],[3,2,1]],false,"Comparing reversed arrays");
+  suite.add([[1,2,3,4],[1,2,3]],false,"Comparing almost equal arrays");
+  suite.add([[1,2,3],[1,2,3,4]],false,"Comparing almost equal arrays");
+  suite.add([[],[]],true,"Comparing empty arrays");
+  suite.add([[{},1,true],[{},1,true]],true,"Two equal arrays containing objects");
+  suite.add([[[1,2,3],{a:1},1],[[1,2,3],{a:1},1]],true,"Two equal arrays containing objects and arrays");
+  suite.add([[[1,2,3],{b:1}],[[1,2,3],{b:2}]],false,"Arrays of objects and arrays unequal in second one object value");
+  suite.add([[[1,2,3],{b:1}],[[1,2,3],{a:1}]],false,"Arrays of objects and arrays unequal in key name");
+  suite.add([[[1,2,3,4],{b:1}],[[1,2,3],{b:1}]],false,"Arrays of objects and arrays unequal in array content");
+  suite.add([[{b:2},[1,2,3]],[[1,2,3],{b:2}]],false,"Arrays of objects and arrays unequal in element order");
+  
+  suite.add([testData.object,testData.object],true,"Equal object comparison");
+  suite.add([testData.object,{"d":4,"c":3,"b":2,"a":1}],false,"Comparing objects with reversed keys");
+  suite.add([testData.object,{"a":1,"b":2,"c":3}],false,"Comparing almost equal objects");
+  suite.add([{"a":1,"b":2,"c":3},testData.object],false,"Comparing almost equal objects");
+  suite.add([{},{}],true,"Comparing empty objects");
+  suite.add([{"a":{},"b":1,"c":true},{"a":{},"b":1,"c":true}],true,"Two equal objects containing objects");
+  suite.add([{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}],true,"Equal objects containing objects and arrays");
+  suite.add([{"a":[1,2],"b":{b:1}},{"a":[1,2,3],"b":{b:2}}],false,"Objects unequal in second one object value");
+  suite.add([{"a":[1,2,3],"b":{b:1}},{"a":[1,2,3],"b":{a:1}}],false,"Objects unequal in key name");
+  suite.add([{"a":[1,2,3,4],"b":{b:1}},{"a":[1,2,3],"b":{b:1}}],false,"Objects unequal in array content");
+  suite.add([{"a":{b:2},"b":[1,2,3]},{"a":[1,2,3],"b":{b:2}}],false,"Objects unequal in element order");
+  suite.execute(Komunalne.util.deepEquals,assert.buildFor("strictEqual"));
+});
+
+QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
   
   // Integers.

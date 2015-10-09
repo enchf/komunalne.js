@@ -92,7 +92,7 @@ Komunalne.util.deepEquals = function(a,b) {
   ai = Komunalne.util.isIterable(a);
   bi = Komunalne.util.isIterable(b);
   
-  if (ai && bi) {
+  if (ai && bi && a.constructor.name === b.constructor.name) {
     ait = new Komunalne.helper.Iterator(a);
     bit = new Komunalne.helper.Iterator(b);
     equal = ait.length() == bit.length();
@@ -101,6 +101,7 @@ Komunalne.util.deepEquals = function(a,b) {
       an = ait.next();
       bn = bit.next();
       equal = Komunalne.util.deepEquals(an,bn);
+      equal = equal && ait.currentKey() == bit.currentKey();
     }
   } else equal = (ai == bi && a === b);
   
