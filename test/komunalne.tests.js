@@ -356,29 +356,56 @@ QUnit.test("Array concatenation", function(assert) {
 
 QUnit.test("For each function for objects, arguments and arrays", function(assert) {
   var str = "";
-  var test = function(x) { str += x; };
-  var fn = function() { Komunalne.util.forEach(arguments,test); };
-  var F = function() { this.str = ""; };
-  F.prototype.fn = function(x) { this.str += x; };
-  var f = new F();
+  var keys = "";
+  var current;
+  var test = function(x,i,obj) { 
+    str += x; 
+    keys += i;
+    assert.equal(obj,current,"Validation of iterated object as argument");
+  };
+  var fn = function() { 
+    current = arguments;
+    Komunalne.util.forEach(arguments,test);
+  };
+  var F = function(obj) { 
+    this.str = "";
+    this.keys = "";
+    this.obj = obj;
+  };
+  F.prototype.fn = function(x,i,obj) { 
+    this.str += x;
+    this.keys += i;
+    assert.equal(obj,this.obj,"Validation of iterated object as argument in scoped calls");
+  };
+  var f;
   
-  Komunalne.util.forEach([1,2,3],test);
-  assert.strictEqual(str,"123","For each in array");
+  current = [1,2,3];
+  Komunalne.util.forEach(current,test);
+  assert.strictEqual(str,"123","For each in array: values");
+  assert.strictEqual(keys,"012","For each in array: keys");
   str = "";
+  keys = "";
   
-  Komunalne.util.forEach({a:1,b:2,c:4},test);
-  assert.strictEqual(str,"124","For each in object");
+  current = {a:1,b:2,c:4};
+  Komunalne.util.forEach(current,test);
+  assert.strictEqual(str,"124","For each in object: values");
+  assert.strictEqual(keys,"abc","For each in object: keys");
   str = "";
+  keys = "";
   
   fn(1,2,3,5,8);
-  assert.strictEqual(str,"12358","For each with arguments");
+  assert.strictEqual(str,"12358","For each with arguments: values");
+  assert.strictEqual(keys,"01234","For each with arguments: keys");
   
-  Komunalne.util.forEach([3,2,1],f.fn,f);
-  assert.strictEqual(f.str,"321","For each with scope and array");
-  f = new F();
+  f = new F([3,2,1]);
+  Komunalne.util.forEach(f.obj,f.fn,f);
+  assert.strictEqual(f.str,"321","For each with scope and array: values");
+  assert.strictEqual(f.keys,"012","For each with scope and array: keys");
   
-  Komunalne.util.forEach({a:true,b:false},f.fn,f);
-  assert.strictEqual(f.str,"truefalse","For each with scope and object");
+  f = new F({a:true,b:false});
+  Komunalne.util.forEach(f.obj,f.fn,f);
+  assert.strictEqual(f.str,"truefalse","For each with scope and object: values");
+  assert.strictEqual(f.keys,"ab","For each with scope and object: keys");
 });
 
 QUnit.test("Currency formatter", function(assert) {

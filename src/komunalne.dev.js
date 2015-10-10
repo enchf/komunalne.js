@@ -237,13 +237,17 @@ Komunalne.util.arrayConcat = function() {
 
 /**
  * For each method that works both on objects or array/arguments.
+ * The method passes the arguments to the callback function in the same way as native Array.forEach does:
+ * - value: The value element.
+ * - key: Index for arrays and key for objects.
+ * - object: The iterated array or object.
  */
 Komunalne.util.forEach = function(obj,fn,scope) {
   var i;
   if (Komunalne.util.isArray(obj)) obj.forEach(fn,scope);
   else {
     i = new Komunalne.helper.Iterator(obj);
-    while (i.hasNext()) fn.call(scope,i.next());
+    while (i.hasNext()) fn.call(scope,i.next(),i.currentKey(),obj);
   }
 };
 
