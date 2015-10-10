@@ -154,3 +154,15 @@ Komunalne.util.arrayConcat = function() {
   while (i.hasNext()) arr = arr.concat(i.next());
   return arr;
 };
+
+/**
+ * For each method that works both on objects or array/arguments.
+ */
+Komunalne.util.forEach = function(obj,fn,scope) {
+  var i;
+  if (Komunalne.util.isArray(obj)) obj.forEach(fn,scope);
+  else {
+    i = new Komunalne.helper.Iterator(obj);
+    while (i.hasNext()) fn.call(scope,i.next());
+  }
+};

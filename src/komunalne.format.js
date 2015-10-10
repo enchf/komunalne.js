@@ -27,4 +27,3 @@ Komunalne.format.currency = function(num,nd,ds,ms){
  * @param str String to be capitalized.
  */
 Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
-

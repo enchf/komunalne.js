@@ -354,6 +354,33 @@ QUnit.test("Array concatenation", function(assert) {
   assert.equal(a[1],2,"Concatenated arrays not affected after modifying resulting array");
 });
 
+QUnit.test("For each function for objects, arguments and arrays", function(assert) {
+  var str = "";
+  var test = function(x) { str += x; };
+  var fn = function() { Komunalne.util.forEach(arguments,test); };
+  var F = function() { this.str = ""; };
+  F.prototype.fn = function(x) { this.str += x; };
+  var f = new F();
+  
+  Komunalne.util.forEach([1,2,3],test);
+  assert.strictEqual(str,"123","For each in array");
+  str = "";
+  
+  Komunalne.util.forEach({a:1,b:2,c:4},test);
+  assert.strictEqual(str,"124","For each in object");
+  str = "";
+  
+  fn(1,2,3,5,8);
+  assert.strictEqual(str,"12358","For each with arguments");
+  
+  Komunalne.util.forEach([3,2,1],f.fn,f);
+  assert.strictEqual(f.str,"321","For each with scope and array");
+  f = new F();
+  
+  Komunalne.util.forEach({a:true,b:false},f.fn,f);
+  assert.strictEqual(f.str,"truefalse","For each with scope and object");
+});
+
 QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
   
