@@ -1,22 +1,30 @@
 /**
- * Test case object.
- * @param args Arguments to be passed to the target function.
- * @param expected (optional) Expected return value.
- * @param msg (optional) Test case message.
+ * Test case object build with a config object with the following properties (all optional):
+ * - expected Expected return value. Mandatory as it is the comparison value.
+ * - args Arguments to be passed to the target function, if any. Mandatory to be an array.
+ * - msg Test case message.
  */
-Komunalne.test.Case = function(args,expected,msg) {
-  this.args = args;
-  this.expected = expected;
-  this.msg = msg;
+Komunalne.test.Case = function(config) {
+  config = config || {};
+  this.expected = config.expected;
+  this.args = config.args;
+  this.msg = config.msg;
 };
-Komunalne.test.Case.prototype.hasExpected = function() { return this.expected !== undefined; };
-Komunalne.test.Case.prototype.hasMsg = function() { return this.msg !== undefined; };
-Komunalne.test.Case.prototype.execute = function(method,test) {
-  var args = [];
-  args.push(method.apply(this.args));
-  if (this.hasExpected()) args.push(this.expected);
-  if (this.hasMsg()) args.push(this.msg);
-  test.apply(args);
+
+/**
+ * Test case execution of the expected value against (if any, if args) a method using a verification test.
+ * Both arguments need to be functions or instances of K.helper.Method.
+ * @param verifier Verifier method, usually constructed from QUnit.assert.buildFor K.js add-on.
+ * @param method (optional) Optional method execution, valid if and only if args property is set.
+ */
+Komunalne.test.Case.prototype.execute = function(verifier,method) {
+  var vargs = [];
+  verifier = Komunalne.util.isFunction(verifier) ? new Komunalne.helper.Method(verifier) : verifier;
+  method = Komunalne.util.isFunction(method) ? new Komunalne.helper.Method(method) : method;
+  if (this.expected) vargs.push(this.expected);
+  if (method && this.args) vargs.push(method.apply(this.args));
+  if (this.msg) vargs.push(this.msg);
+  verifier.apply(vargs);
 };
 
 /**
@@ -29,29 +37,20 @@ Komunalne.test.Suite = function(cases) {
 };
 Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
 Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
-Komunalne.test.Suite.prototype.add = function(args,expected,msg) { 
-  this.cases.push(new Komunalne.test.Case(args,expected,msg));
+Komunalne.test.Suite.prototype.add = function(ex,args,msg) { 
+  this.cases.push(new Komunalne.test.Case(ex,args,msg));
 };
 Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
 
 /**
  * Execute a set of test cases.
- * @param cases An array of Komunalne.test.Case objects or a Komunalne.test.Suite object. 
- *   The order in which attributes are passed to the test method is args > expected > msg, as they are present.
- * @param method A function or a Komunalne.test.Method object.
- * @param test A function or a Komunalne.test.Method object (in case of QUnit.assert, assert object should be the scope.
+ * @param verifier Verifier method, function or instance of K.helper.Method.
+ * @param method (optional) Method to be executed against the expected value, function or instance of K.helper.Method.
  */
-Komunalne.test.Suite.prototype.execute = function(method,test) {
-  var testcase;
-  var args;
-  var iterator;
-  
-  method = typeof method == "function" ? new Komunalne.helper.Method(method) : method;
-  test = typeof test == "function" ? new Komunalne.helper.Method(test) : test;
-  iterator = this.iterator();
-  
+Komunalne.test.Suite.prototype.execute = function(verifier,method) {
+  var iterator = this.iterator();
   while (iterator.hasNext()) {
-    iterator.next().execute(method,test);
+    iterator.next().execute(verifier,method);
   }
 };
 

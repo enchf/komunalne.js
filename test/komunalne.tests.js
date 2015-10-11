@@ -63,25 +63,24 @@ QUnit.test("Unit test executor", function(assert) {
   var suite = new Komunalne.test.Suite();
   var i = 1;
   
-  suite.add(["Fake",1]);
-  suite.add(["Fake",2],2);
-  suite.add(["Fake",3],3,"Message");
+  suite.add({ "expected": 1 });
+  suite.add({ "expected": 2, "args": ["Fake",2] });
+  suite.add({ "expected": 3, "args": ["Fake",3], "msg": "Message" });
   
-  suite.execute(function(name,i) { return i; }, function(a,b,c) {
+  suite.execute(function(a,b,c) {
     assert.equal(a,arguments.length,"Arguments number for object " + i);
-    assert.equal(i,a,"Execution order " + (i++));
-  });
+    assert.equal(a,i,"Execution order " + (i++));
+  },function(name,x) { return x; });
   
-  var ignoreOnlyNullOrUndefined = new Komunalne.test.Case([],"","Call to append without arguments");
+  var ignoreOnlyNullOrUndefined = new Komunalne.test.Case(
+    { "expected": "", "args": [], "msg": "Append without arguments" });
   var funct = function(a,b,c) { 
     assert.equal(arguments.length, 3, "Preventing to avoid skip false-able values ('',false,...)");
     assert.deepEqual(a,"","Check to prevent skipping empty strings");
     assert.equal(b,"","Check to prevent skipping empty strings");
     assert.equal(c,ignoreOnlyNullOrUndefined.msg,"Check for third argument");
   };
-  ignoreOnlyNullOrUndefined.execute(
-    new Komunalne.helper.Method(function() { return ""; }),
-    new Komunalne.helper.Method(funct));
+  ignoreOnlyNullOrUndefined.execute(funct,new Komunalne.helper.Method(function() { return ""; }));
 });
 
 QUnit.test("Iterator implementation", function(assert) {
@@ -181,30 +180,28 @@ QUnit.test("Iterator implementation", function(assert) {
 QUnit.test("Append util function", function(assert) {
   var suite = new Komunalne.test.Suite();
   
-  suite.add([],"","Call to append without arguments");
-  suite.add([""],"","Call to append with empty string");
-  suite.add(["Str"],"Str","Call to append with single string");
-  suite.add(["A","B"],"A B","Call to append with two strings");
-  suite.add(["A","B","C"],"ACB","Call to append with three strings");
-  suite.add(["A",null],"A","Append null to string");
-  suite.add(["A",null,"C"],"AC","Append null with separator");
-  suite.add([null,"B"],"B","Append string to null");
-  suite.add([null,"B","C"],"CB","Append string to null with separator");
+  suite.add({ "expected": "", "args": [], "msg": "Call to append without arguments" });
+  suite.add({ "expected": "", "args": [""], "msg": "Call to append with empty string" });
+  suite.add({ "expected": "Str", "args": ["Str"], "msg": "Call to append with single string" });
+  suite.add({ "expected": "A B", "args": ["A","B"], "msg": "Call to append with two strings" });
+  suite.add({ "expected": "ACB", "args": ["A","B","C"], "msg": "Call to append with three strings" });
+  suite.add({ "expected": "A", "args": ["A",null], "msg": "Append null to string" });
+  suite.add({ "expected": "AC", "args": ["A",null,"C"], "msg": "Append null with separator" });
+  suite.add({ "expected": "B", "args": [null,"B"], "msg": "Append string to null" });
+  suite.add({ "expected": "CB", "args": [null,"B","C"], "msg": "Append string to null with separator" });
   
-  suite.execute(Komunalne.util.append, assert.buildFor("equal"));
+  suite.execute(assert.buildFor("equal"),Komunalne.util.append);
 });
 
 QUnit.test("Path lookup function", function(assert) {
   var obj = { "a": 1, "b": [1,2,3], "c": "str", "d": { "e": "e", "f": { "g": false }, "h": true }, "i": -1 };
   var suite = new Komunalne.test.Suite();
-  
-  suite.add([obj,"a"],1,"Test simple path ['a']");
-  suite.add([obj,"d.e"],"e","Test one depth ['d.e']");
-  suite.add([obj,"d.f.g"],false,"Test two depth ['d.f.g']");
-  suite.add([obj,"d.i.f"],null,"Test unreachable path === null");
-  suite.add([obj,"a.b"],null,"Test try to go deep into a non object");
-  
-  suite.execute(Komunalne.util.path, assert.buildFor("strictEqual")); 
+  suite.add({ "expected": 1, "args": [obj,"a"], "msg": "Test simple path ['a']" });
+  suite.add({ "expected": "e", "args": [obj,"d.e"], "msg": "Test one depth ['d.e']" });
+  suite.add({ "expected": false, "args": [obj,"d.f.g"], "msg": "Test two depth ['d.f.g']" });
+  suite.add({ "expected": null, "args": [obj,"d.i.f"], "msg": "Test unreachable path === null" });
+  suite.add({ "expected": null, "args": [obj,"a.b"], "msg": "Test try to go deep into a non object" });
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.path); 
 });
 
 QUnit.test("Date, Function, Iterable and Array type test functions", function(assert) {
@@ -218,14 +215,12 @@ QUnit.test("Date, Function, Iterable and Array type test functions", function(as
   
   for (var i in all) {
     suite = new Komunalne.test.Suite();
-    
     for (var obj in testData) {
       result = all[i].indexOf(obj) >= 0;
       msg = dataNames[obj] + " is" + (result ? " " : " not ") + "true for " + fns[i];
-      suite.add([testData[obj]], result, msg); 
+      suite.add({ "expected": result, "args": [testData[obj]], "msg": msg }); 
     }
-    
-    suite.execute(Komunalne.util[fns[i]],assert.buildFor("strictEqual"));
+    suite.execute(assert.buildFor("strictEqual"),Komunalne.util[fns[i]]);
   }
 });
 
@@ -237,9 +232,9 @@ QUnit.test("Date type test in strict mode", function(assert) {
   for (var obj in testData) {
     result = obj === dateStrictTest;
     msg = dataNames[obj] + " is" + (result ? " " : " not ") + "a valid date object";
-    suite.add([testData[obj],true],result,msg);
+    suite.add({ "expected": result, "args": [testData[obj],true], "msg": msg });
   }
-  suite.execute(Komunalne.util.isDate,assert.buildFor("strictEqual"));
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.isDate);
 });
 
 QUnit.test("Is instance of type test", function(assert) {
@@ -248,26 +243,26 @@ QUnit.test("Is instance of type test", function(assert) {
   for (var typ in testDataTypes) {
     for (var obj in testData) {
       res = Komunalne.util.arrayContains(obj,testDataTypes[typ].apply);
-      suite.add([testData[obj],testDataTypes[typ].type], res, 
-                "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type " 
-                + testDataTypes[typ].type.toString());
+      suite.add({ "expected": res, "args": [testData[obj],testDataTypes[typ].type],
+                  "msg": "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type " 
+                + testDataTypes[typ].type.toString() });
     }
   }
-  suite.execute(Komunalne.util.isInstanceOf,assert.buildFor("strictEqual"));
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.isInstanceOf);
 });
 
 QUnit.test("Is Array of search", function(assert) {
   var suite = new Komunalne.test.Suite();
-  suite.add([[1,2,3],"number"],true,"Full numbers array");
-  suite.add([[1,2,true,3],"number"],false,"Partial numbers array");
-  suite.add([[1,2,3],"string"],false,"Wrong type comparison");
-  suite.add([[],"string"],true,"Empty array qualifies as array of any type");
-  suite.add([[new T(),new T()],T],true,"Array of custom types");
-  suite.add([[new T(),new U(),new T()],T],false,"Array of custom types intermixed");
-  suite.add([[new T(),new T()],"object"],true,"Array of custom types against object");
-  suite.add([[[],[]],Array],true,"Array of arrays");
-  suite.add([{},"number"],false,"Not array passed as argument");
-  suite.execute(Komunalne.util.isArrayOf,assert.buildFor("strictEqual"));
+  suite.add({ "args": [[1,2,3],"number"], "msg": "Full numbers array" });
+  suite.add({ "args": [[1,2,true,3],"number"], "msg": "Partial numbers array" });
+  suite.add({ "args": [[1,2,3],"string"], "msg": "Wrong type comparison" });
+  suite.add({ "args": [[],"string"], "msg": "Empty array qualifies as array of any type" });
+  suite.add({ "args": [[new T(),new T()],T], "msg": "Array of custom types" });
+  suite.add({ "args": [[new T(),new U(),new T()],T], "msg": "Array of custom types intermixed" });
+  suite.add({ "args": [[new T(),new T()],"object"], "msg": "Array of custom types against object" });
+  suite.add({ "args": [[[],[]],Array], "msg": "Array of arrays" });
+  suite.add({ "args": [{},"number"], "msg": "Not array passed as argument" });
+  suite.execute(assert.buildFor("ok"),Komunalne.util.isArrayOf);
 });
 
 QUnit.test("Are of same class? comparison", function(assert) {
@@ -280,69 +275,70 @@ QUnit.test("Are of same class? comparison", function(assert) {
   };
   for (var x in data) {
     for (var y in data2) {
-      suite.add([data[x],data2[y]],x == y,"Comparison between " + x + " and " + y + ": " + (x == y));
+      suite.add(x == y,[data[x],data2[y]],"Comparison between " + x + " and " + y + ": " + (x == y));
     }
   }
-  suite.execute(Komunalne.util.areSameClass,assert.buildFor("strictEqual"));
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.areSameClass);
 });
 
 QUnit.test("Deep equals", function(assert) {
   var suite = new Komunalne.test.Suite();
-  suite.add([testData.array,testData.array],true,"Equal arrays comparison");
-  suite.add([[1,2,3],[3,2,1]],false,"Comparing reversed arrays");
-  suite.add([[1,2,3,4],[1,2,3]],false,"Comparing almost equal arrays");
-  suite.add([[1,2,3],[1,2,3,4]],false,"Comparing almost equal arrays");
-  suite.add([[],[]],true,"Comparing empty arrays");
-  suite.add([[{},1,true],[{},1,true]],true,"Two equal arrays containing objects");
-  suite.add([[[1,2,3],{a:1},1],[[1,2,3],{a:1},1]],true,"Two equal arrays containing objects and arrays");
-  suite.add([[[1,2,3],{b:1}],[[1,2,3],{b:2}]],false,"Arrays of objects and arrays unequal in second one object value");
-  suite.add([[[1,2,3],{b:1}],[[1,2,3],{a:1}]],false,"Arrays of objects and arrays unequal in key name");
-  suite.add([[[1,2,3,4],{b:1}],[[1,2,3],{b:1}]],false,"Arrays of objects and arrays unequal in array content");
-  suite.add([[{b:2},[1,2,3]],[[1,2,3],{b:2}]],false,"Arrays of objects and arrays unequal in element order");
+  suite.add({ "args": [testData.array,testData.array], "msg": "Equal arrays comparison" });
+  suite.add({ "args": [[1,2,3],[3,2,1]], "msg": "Comparing reversed arrays" });
+  suite.add({ "args": [[1,2,3,4],[1,2,3]], "msg": "Comparing almost equal arrays" });
+  suite.add({ "args": [[1,2,3],[1,2,3,4]], "msg": "Comparing almost equal arrays" });
+  suite.add({ "args": [[],[]], "msg": "Comparing empty arrays" });
+  suite.add({ "args": [[{},1,true],[{},1,true]], "msg": "Two equal arrays containing objects" });
+  suite.add({ "args": [[[1,3],{a:1},1],[[1,3],{a:1},1]], "msg": "Two equal arrays containing objects and arrays" });
+  suite.add({ "args": [[[1,3],{b:1}],[[1,3],{b:2}]], "msg": "Mixed arrays unequal in second one object value" });
+  suite.add({ "args": [[[1,2,3],{b:1}],[[1,2,3],{a:1}]], "msg": "Arrays of objects and arrays unequal in key name" });
+  suite.add({ "args": [[[1,2,3,4],{b:1}],[[1,2,3],{b:1}]], "msg": "Mixed arrays unequal in array content" });
+  suite.add({ "args": [[{b:2},[1,2,3]],[[1,2,3],{b:2}]], "msg": "Mixed arrays unequal in element order" });
   
-  suite.add([testData.object,testData.object],true,"Equal object comparison");
-  suite.add([testData.object,{"d":4,"c":3,"b":2,"a":1}],false,"Comparing objects with reversed keys");
-  suite.add([testData.object,{"a":1,"b":2,"c":3}],false,"Comparing almost equal objects");
-  suite.add([{"a":1,"b":2,"c":3},testData.object],false,"Comparing almost equal objects");
-  suite.add([{},{}],true,"Comparing empty objects");
-  suite.add([{"a":{},"b":1,"c":true},{"a":{},"b":1,"c":true}],true,"Two equal objects containing objects");
-  suite.add([{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}],true,"Equal objects containing objects and arrays");
-  suite.add([{"a":[1,2],"b":{b:1}},{"a":[1,2,3],"b":{b:2}}],false,"Objects unequal in second one object value");
-  suite.add([{"a":[1,2,3],"b":{b:1}},{"a":[1,2,3],"b":{a:1}}],false,"Objects unequal in key name");
-  suite.add([{"a":[1,2,3,4],"b":{b:1}},{"a":[1,2,3],"b":{b:1}}],false,"Objects unequal in array content");
-  suite.add([{"a":{b:2},"b":[1,2,3]},{"a":[1,2,3],"b":{b:2}}],false,"Objects unequal in element order");
-  suite.add([new T(),new T()],true,"Equal objects of custom types");
-  suite.add([new U(),new T()],false,"Equal objects but of different custom type");
-  suite.execute(Komunalne.util.deepEquals,assert.buildFor("strictEqual"));
+  suite.add({ "args": [testData.object,testData.object], "msg": "Equal object comparison" });
+  suite.add({ "args": [testData.object,{"d":4,"c":3,"b":2,"a":1}], "msg": "Comparing objects with reversed keys" });
+  suite.add({ "args": [testData.object,{"a":1,"b":2,"c":3}], "msg": "Comparing almost equal objects" });
+  suite.add({ "args": [{"a":1,"b":2,"c":3},testData.object], "msg": "Comparing almost equal objects" });
+  suite.add({ "args": [{},{}], "msg": "Comparing empty objects" });
+  suite.add({ "args": [{"a":{},"b":1,"c":true},{"a":{},"b":1,"c":true}], "msg": "Two equal objects containing objects" });
+  suite.add({ "args": [{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}], "msg": "Equal mixed objects" });
+  suite.add({ "args": [{"a":[1],"b":{b:1}},{"a":[1,3],"b":{b:2}}], "msg": "Objects unequal in second one object value" });
+  suite.add({ "args": [{"a":[1,2,3],"b":{b:1}},{"a":[1,2,3],"b":{a:1}}], "msg": "Objects unequal in key name" });
+  suite.add({ "args": [{"a":[1,2,3,4],"b":{b:1}},{"a":[1,2,3],"b":{b:1}}], "msg": "Objects unequal in array content" });
+  suite.add({ "args": [{"a":{b:2},"b":[1,2,3]},{"a":[1,2,3],"b":{b:2}}], "msg": "Objects unequal in element order" });
+  suite.add({ "args": [new T(),new T()], "msg": "Equal objects of custom types" });
+  suite.add({ "args": [new U(),new T()], "msg": "Equal objects but of different custom type" });
+  suite.execute(assert.buildFor("ok"),Komunalne.util.deepEquals);
 });
 
 QUnit.test("Array lookup functions (array contains and is any of?)", function(assert) {
   var suite = new Komunalne.test.Suite();
   var aux;
-  suite.add([1,[1,2,3]],true,"Lookup for existing element");
-  suite.add([0,[1,2,3]],false,"Lookup for non existing element");
-  suite.add([new T(),[new T(),new T()]],false,"Lookup for objects but not exactly the same instance");
-  suite.add([(aux=new T()),[new T(),aux,new T()]],true,"Lookup for objects where is present the same instance");
-  suite.add([new T(),[new T(),new T()],true],true,"Lookup for equally objects using deep equals flag");
-  suite.add([new T(),[new T(),new T()],"true"],false,"Lookup for equally objects using non strict deep equals flag");
-  suite.add([{a:1},[{c:{a:1}},2,""],true],false,"Lookup for unexisting object");
-  suite.add([{a:1},[{a:2},{a:1},{a:3}]],false,"Lookup for existing object without deep equals flag");
-  suite.add([{a:1},[{a:2},{a:1},{a:3}],true],true,"Lookup for existing object with deep equals flag");
-  suite.add([[1,2],[[1,3],[1,2]],true],true,"Lookup for arrays with deep equals flag");
-  suite.add([[1,2],[[1,3],[1,2]]],false,"Lookup for arrays without deep equals flag");
-  suite.add([(aux=[1,2]),[[1,3],[1,2],aux]],true,"Lookup for exactly array instance without deep equals flag");
+  suite.add({ "args": [1,[1,2,3]], "msg": "Lookup for existing element" });
+  suite.add({ "args": [0,[1,2,3]], "msg": "Lookup for non existing element" });
+  suite.add({ "args": [new T(),[new T(),new T()]], "msg": "Lookup for objects but not exactly the same instance" });
+  suite.add({ "args": [(aux=new T()),[new T(),aux,{}]], "msg": "Lookup for objects where is present the same instance" });
+  suite.add({ "args": [new T(),[new T(),new T()],true], "msg": "Lookup for equally objects using deep equals flag" });
+  suite.add({ "args": [new T(),[new T(),new T()],"true"], 
+              "msg": "Lookup for equally objects using non strict deep equals flag" });
+  suite.add({ "args": [{a:1},[{c:{a:1}},2,""],true], "msg": "Lookup for unexisting object" });
+  suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}]], "msg": "Lookup for existing object without deep equals flag" });
+  suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}],true], "msg": "Lookup for existing object with deep equals flag" });
+  suite.add({ "args": [[1,2],[[1,3],[1,2]],true], "msg": "Lookup for arrays with deep equals flag" });
+  suite.add({ "args": [[1,2],[[1,3],[1,2]]], "msg": "Lookup for arrays without deep equals flag" });
+  suite.add({ "args": [(aux=[1,2]),[[1,3],[1,2],aux]], "msg": "Lookup for array instance without deep equals flag" });
   suite.execute(Komunalne.util.arrayContains,assert.buildFor("strictEqual"));
   
   suite = new Komunalne.test.Suite();
-  suite.add([1,2,3,4,1,5],true,"Lookup for existing integer in arguments list");
-  suite.add([0,2,3,4,1,5],false,"Lookup for non existing integer in arguments list");
-  suite.add(["1",2,3,"4",1,"1",5],true,"Lookup in mixed-type array for existing element");
-  suite.add(["1",2,3,"4",1,5],false,"Lookup in mixed-type array for non-exactly-the-same-type element");
-  suite.add([new T(),new T(),new U(),new T()],false,"Lookup for objects but not the same instance");
-  suite.add([(aux=new U()),new T(),new U(),aux,new T()],true,"Lookup for the same instance objects");
-  suite.add([[1,2],[1,3],[1,2],[1,4]],false,"Lookup for arrays but not the same instance");
-  suite.add([(aux=[1,2]),[1,3],aux,[1,2],[1,4]],true,"Lookup for the same instance array");
-  suite.execute(Komunalne.util.isAnyOf,assert.buildFor("strictEqual"));
+  suite.add({ "args": [1,2,3,4,1,5], "msg": "Lookup for existing integer in arguments list" });
+  suite.add({ "args": [0,2,3,4,1,5], "msg": "Lookup for non existing integer in arguments list" });
+  suite.add({ "args": ["1",2,3,"4",1,"1",5], "msg": "Lookup in mixed-type array for existing element" });
+  suite.add({ "args": ["1",2,3,"4",1,5], "msg": "Lookup in mixed-type array for non-exactly-the-same-type element" });
+  suite.add({ "args": [new T(),new T(),new U(),new T()], "msg": "Lookup for objects but not the same instance" });
+  suite.add({ "args": [(aux=new U()),new T(),new U(),aux,new T()], "msg": "Lookup for the same instance objects" });
+  suite.add({ "args": [[1,2],[1,3],[1,2],[1,4]], "msg": "Lookup for arrays but not the same instance" });
+  suite.add({ "args": [(aux=[1,2]),[1,3],aux,[1,2],[1,4]], "msg": "Lookup for the same instance array" });
+  suite.execute(Komunalne.util.isAnyOf,assert.buildFor("ok"));
 });
 
 QUnit.test("Array concatenation", function(assert) {
@@ -412,49 +408,47 @@ QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
   
   // Integers.
-  suite.add([1],"1.00","Integer");
-  suite.add([0],"0.00","Integer with 0");
-  suite.add([666],"666.00","Integer with 3 digits");
-  suite.add([1010],"1,010.00","Integer greater than 1000");
-  suite.add([123456789012],"123,456,789,012.00","Big integer");
-  suite.add([12345],"12,345.00","Integer with 5 digits");
-  suite.add([-0],"0.00","-0");
-  suite.add([-1],"-1.00","Negative digit");
-  suite.add([-123],"-123.00","Negative with 3 digits");
-  suite.add([-12345],"-12,345.00","Negative with 5 digits");
-  suite.add([-123456789012],"-123,456,789,012.00","Big negative");
+  suite.add({ "args": [1], "expected": "1.00", "msg": "Integer" });
+  suite.add({ "args": [0], "expected": "0.00", "msg": "Integer with 0" });
+  suite.add({ "args": [666], "expected": "666.00", "msg": "Integer with 3 digits" });
+  suite.add({ "args": [1010], "expected": "1,010.00", "msg": "Integer greater than 1000" });
+  suite.add({ "args": [123456789012], "expected": "123,456,789,012.00", "msg": "Big integer" });
+  suite.add({ "args": [12345], "expected": "12,345.00", "msg": "Integer with 5 digits" });
+  suite.add({ "args": [-0], "expected": "0.00", "msg": "-0" });
+  suite.add({ "args": [-1], "expected": "-1.00", "msg": "Negative digit" });
+  suite.add({ "args": [-123], "expected": "-123.00", "msg": "Negative with 3 digits" });
+  suite.add({ "args": [-12345], "expected": "-12,345.00", "msg": "Negative with 5 digits" });
+  suite.add({ "args": [-123456789012], "expected": "-123,456,789,012.00", "msg": "Big negative" });
   
   // floats.
-  suite.add([1.23],"1.23","Float");
-  suite.add([0.01],"0.01","Float between 0 and 1");
-  suite.add([-12.34],"-12.34","Negative float");
-  suite.add([-12345678.901234],"-12,345,678.90","Big negative float");
-  suite.add([1.235],"1.24","Rounding up");
-  suite.add([1.234],"1.23","Rounding down");
-  suite.add([1.2],"1.20","Padding zeros");
-  suite.add([1.999],"2.00","Complex rounding up");
-  suite.add([-1.999],"-2.00","Negative complex round");
+  suite.add({ "args": [1.23], "expected": "1.23", "msg": "Float" });
+  suite.add({ "args": [0.01], "expected": "0.01", "msg": "Float between 0 and 1" });
+  suite.add({ "args": [-12.34], "expected": "-12.34", "msg": "Negative float" });
+  suite.add({ "args": [-12345678.901234], "expected": "-12,345,678.90", "msg": "Big negative float" });
+  suite.add({ "args": [1.235], "expected": "1.24", "msg": "Rounding up" });
+  suite.add({ "args": [1.234], "expected": "1.23", "msg": "Rounding down" });
+  suite.add({ "args": [1.2], "expected": "1.20", "msg": "Padding zeros" });
+  suite.add({ "args": [1.999], "expected": "2.00", "msg": "Complex rounding up" });
+  suite.add({ "args": [-1.999], "expected": "-2.00", "msg": "Negative complex round" });
   
   // formatter changing default parameters.
-  suite.add([1.234444,3],"1.234","3 decimals round down");
-  suite.add([1.234567,4],"1.2346","4 decimals round up");
-  suite.add([0.000001,3],"0.000","Round down to 0");
-  suite.add([1.2,6],"1.200000","Padding zeros");
-  suite.add([1.20019001,4],"1.2002","4 decimals round up");
-  suite.add([1.23,3,"@"],"1@230","Changing decimal separator");
-  suite.add([12345.567,2,"-","="],"12=345-57", 
-              "Changing both decimal and thousands separators");
-  suite.add([12345.6543,2,"$%&","--"],"12--345$%&65", 
-              "Length > 1 separators");
+  suite.add({ "args": [1.234444,3], "expected": "1.234", "msg": "3 decimals round down" });
+  suite.add({ "args": [1.234567,4], "expected": "1.2346", "msg": "4 decimals round up" });
+  suite.add({ "args": [0.000001,3], "expected": "0.000", "msg": "Round down to 0" });
+  suite.add({ "args": [1.2,6], "expected": "1.200000", "msg": "Padding zeros" });
+  suite.add({ "args": [1.20019001,4], "expected": "1.2002", "msg": "4 decimals round up" });
+  suite.add({ "args": [1.23,3,"@"], "expected": "1@230", "msg": "Changing decimal separator" });
+  suite.add({ "args": [12345.567,2,"-","="], "expected": "12=345-57", 
+              "msg": "Changing both decimal and thousands separators" });
+  suite.add({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65", 
+              "msg": "Length > 1 separators" });
   
   suite.execute(Komunalne.format.currency, assert.buildFor("equal"));
 });
 
 QUnit.test("General testing to format functions", function(assert) {
   var suite = new Komunalne.test.Suite();
-  
-  suite.add(["string"],"String","Simple capitalization");
-  suite.add(["sTrInG"],"String","Capitalization of multiple uppercase string letters");
-  
+  suite.add({ "args": ["string"], "expected": "String", "msg": "Simple capitalization" });
+  suite.add({ "args": ["sTrInG"], "expected": "String", "msg": "Capitalization of multiple uppercase string letters" });
   suite.execute(Komunalne.format.capitalize, assert.buildFor("equal"));
 });
