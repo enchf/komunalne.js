@@ -254,15 +254,17 @@ QUnit.test("Is instance of type test", function(assert) {
 QUnit.test("Is Array of search", function(assert) {
   var suite = new Komunalne.test.Suite();
   suite.add({ "args": [[1,2,3],"number"], "msg": "Full numbers array" });
-  suite.add({ "args": [[1,2,true,3],"number"], "msg": "Partial numbers array" });
-  suite.add({ "args": [[1,2,3],"string"], "msg": "Wrong type comparison" });
   suite.add({ "args": [[],"string"], "msg": "Empty array qualifies as array of any type" });
   suite.add({ "args": [[new T(),new T()],T], "msg": "Array of custom types" });
-  suite.add({ "args": [[new T(),new U(),new T()],T], "msg": "Array of custom types intermixed" });
   suite.add({ "args": [[new T(),new T()],"object"], "msg": "Array of custom types against object" });
   suite.add({ "args": [[[],[]],Array], "msg": "Array of arrays" });
-  suite.add({ "args": [{},"number"], "msg": "Not array passed as argument" });
   suite.execute(assert.buildFor("ok"),Komunalne.util.isArrayOf);
+  suite.clear();
+  suite.add({ "args": [[1,2,true,3],"number"], "msg": "Partial numbers array" });
+  suite.add({ "args": [[1,2,3],"string"], "msg": "Wrong type comparison" });
+  suite.add({ "args": [[new T(),new U(),new T()],T], "msg": "Array of custom types intermixed" });
+  suite.add({ "args": [{},"number"], "msg": "Not array passed as argument" });
+  suite.execute(assert.buildFor("notOk"),Komunalne.util.isArrayOf);
 });
 
 QUnit.test("Are of same class? comparison", function(assert) {
@@ -284,61 +286,68 @@ QUnit.test("Are of same class? comparison", function(assert) {
 QUnit.test("Deep equals", function(assert) {
   var suite = new Komunalne.test.Suite();
   suite.add({ "args": [testData.array,testData.array], "msg": "Equal arrays comparison" });
-  suite.add({ "args": [[1,2,3],[3,2,1]], "msg": "Comparing reversed arrays" });
-  suite.add({ "args": [[1,2,3,4],[1,2,3]], "msg": "Comparing almost equal arrays" });
-  suite.add({ "args": [[1,2,3],[1,2,3,4]], "msg": "Comparing almost equal arrays" });
   suite.add({ "args": [[],[]], "msg": "Comparing empty arrays" });
   suite.add({ "args": [[{},1,true],[{},1,true]], "msg": "Two equal arrays containing objects" });
   suite.add({ "args": [[[1,3],{a:1},1],[[1,3],{a:1},1]], "msg": "Two equal arrays containing objects and arrays" });
+  suite.add({ "args": [testData.object,testData.object], "msg": "Equal object comparison" });
+  suite.add({ "args": [{},{}], "msg": "Comparing empty objects" });
+  suite.add({ "args": [{"a":{},"b":1,"c":true},{"a":{},"b":1,"c":true}], "msg": "Two equal objects containing objects" });
+  suite.add({ "args": [{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}], "msg": "Equal mixed objects" });
+  suite.add({ "args": [new T(),new T()], "msg": "Equal objects of custom types" });
+  suite.execute(assert.buildFor("ok"),Komunalne.util.deepEquals);
+  
+  suite.clear();
+  suite.add({ "args": [[1,2,3],[3,2,1]], "msg": "Comparing reversed arrays" });
+  suite.add({ "args": [[1,2,3,4],[1,2,3]], "msg": "Comparing almost equal arrays" });
+  suite.add({ "args": [[1,2,3],[1,2,3,4]], "msg": "Comparing almost equal arrays" });
   suite.add({ "args": [[[1,3],{b:1}],[[1,3],{b:2}]], "msg": "Mixed arrays unequal in second one object value" });
   suite.add({ "args": [[[1,2,3],{b:1}],[[1,2,3],{a:1}]], "msg": "Arrays of objects and arrays unequal in key name" });
   suite.add({ "args": [[[1,2,3,4],{b:1}],[[1,2,3],{b:1}]], "msg": "Mixed arrays unequal in array content" });
   suite.add({ "args": [[{b:2},[1,2,3]],[[1,2,3],{b:2}]], "msg": "Mixed arrays unequal in element order" });
-  
-  suite.add({ "args": [testData.object,testData.object], "msg": "Equal object comparison" });
   suite.add({ "args": [testData.object,{"d":4,"c":3,"b":2,"a":1}], "msg": "Comparing objects with reversed keys" });
   suite.add({ "args": [testData.object,{"a":1,"b":2,"c":3}], "msg": "Comparing almost equal objects" });
   suite.add({ "args": [{"a":1,"b":2,"c":3},testData.object], "msg": "Comparing almost equal objects" });
-  suite.add({ "args": [{},{}], "msg": "Comparing empty objects" });
-  suite.add({ "args": [{"a":{},"b":1,"c":true},{"a":{},"b":1,"c":true}], "msg": "Two equal objects containing objects" });
-  suite.add({ "args": [{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}], "msg": "Equal mixed objects" });
   suite.add({ "args": [{"a":[1],"b":{b:1}},{"a":[1,3],"b":{b:2}}], "msg": "Objects unequal in second one object value" });
   suite.add({ "args": [{"a":[1,2,3],"b":{b:1}},{"a":[1,2,3],"b":{a:1}}], "msg": "Objects unequal in key name" });
   suite.add({ "args": [{"a":[1,2,3,4],"b":{b:1}},{"a":[1,2,3],"b":{b:1}}], "msg": "Objects unequal in array content" });
   suite.add({ "args": [{"a":{b:2},"b":[1,2,3]},{"a":[1,2,3],"b":{b:2}}], "msg": "Objects unequal in element order" });
-  suite.add({ "args": [new T(),new T()], "msg": "Equal objects of custom types" });
   suite.add({ "args": [new U(),new T()], "msg": "Equal objects but of different custom type" });
-  suite.execute(assert.buildFor("ok"),Komunalne.util.deepEquals);
+  suite.execute(assert.buildFor("notOk"),Komunalne.util.deepEquals);
 });
 
 QUnit.test("Array lookup functions (array contains and is any of?)", function(assert) {
-  var suite = new Komunalne.test.Suite();
   var aux;
+  var suite = new Komunalne.test.Suite();
+  
   suite.add({ "args": [1,[1,2,3]], "msg": "Lookup for existing element" });
-  suite.add({ "args": [0,[1,2,3]], "msg": "Lookup for non existing element" });
-  suite.add({ "args": [new T(),[new T(),new T()]], "msg": "Lookup for objects but not exactly the same instance" });
   suite.add({ "args": [(aux=new T()),[new T(),aux,{}]], "msg": "Lookup for objects where is present the same instance" });
   suite.add({ "args": [new T(),[new T(),new T()],true], "msg": "Lookup for equally objects using deep equals flag" });
+  suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}],true], "msg": "Lookup for existing object with deep equals flag" });
+  suite.add({ "args": [[1,2],[[1,3],[1,2]],true], "msg": "Lookup for arrays with deep equals flag" });
+  suite.add({ "args": [(aux=[1,2]),[[1,3],[1,2],aux]], "msg": "Lookup for array instance without deep equals flag" });
+  suite.execute(assert.buildFor("ok"),Komunalne.util.arrayContains);
+  suite.clear();
+  suite.add({ "args": [0,[1,2,3]], "msg": "Lookup for non existing element" });
+  suite.add({ "args": [new T(),[new T(),new T()]], "msg": "Lookup for objects but not exactly the same instance" });
   suite.add({ "args": [new T(),[new T(),new T()],"true"], 
               "msg": "Lookup for equally objects using non strict deep equals flag" });
   suite.add({ "args": [{a:1},[{c:{a:1}},2,""],true], "msg": "Lookup for unexisting object" });
   suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}]], "msg": "Lookup for existing object without deep equals flag" });
-  suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}],true], "msg": "Lookup for existing object with deep equals flag" });
-  suite.add({ "args": [[1,2],[[1,3],[1,2]],true], "msg": "Lookup for arrays with deep equals flag" });
   suite.add({ "args": [[1,2],[[1,3],[1,2]]], "msg": "Lookup for arrays without deep equals flag" });
-  suite.add({ "args": [(aux=[1,2]),[[1,3],[1,2],aux]], "msg": "Lookup for array instance without deep equals flag" });
-  suite.execute(Komunalne.util.arrayContains,assert.buildFor("strictEqual"));
+  suite.execute(assert.buildFor("notOk"),Komunalne.util.arrayContains);
   
-  suite = new Komunalne.test.Suite();
+  suite.clear();
   suite.add({ "args": [1,2,3,4,1,5], "msg": "Lookup for existing integer in arguments list" });
-  suite.add({ "args": [0,2,3,4,1,5], "msg": "Lookup for non existing integer in arguments list" });
   suite.add({ "args": ["1",2,3,"4",1,"1",5], "msg": "Lookup in mixed-type array for existing element" });
+  suite.add({ "args": [(aux=new U()),new T(),new U(),aux,new T()], "msg": "Lookup for the same instance objects" });
+  suite.add({ "args": [(aux=[1,2]),[1,3],aux,[1,2],[1,4]], "msg": "Lookup for the same instance array" });
+  suite.execute(assert.buildFor("ok"),Komunalne.util.isAnyOf);
+  suite.clear();
+  suite.add({ "args": [0,2,3,4,1,5], "msg": "Lookup for non existing integer in arguments list" });
   suite.add({ "args": ["1",2,3,"4",1,5], "msg": "Lookup in mixed-type array for non-exactly-the-same-type element" });
   suite.add({ "args": [new T(),new T(),new U(),new T()], "msg": "Lookup for objects but not the same instance" });
-  suite.add({ "args": [(aux=new U()),new T(),new U(),aux,new T()], "msg": "Lookup for the same instance objects" });
   suite.add({ "args": [[1,2],[1,3],[1,2],[1,4]], "msg": "Lookup for arrays but not the same instance" });
-  suite.add({ "args": [(aux=[1,2]),[1,3],aux,[1,2],[1,4]], "msg": "Lookup for the same instance array" });
-  suite.execute(Komunalne.util.isAnyOf,assert.buildFor("ok"));
+  suite.execute(assert.buildFor("notOk"),Komunalne.util.isAnyOf);
 });
 
 QUnit.test("Array concatenation", function(assert) {
@@ -443,12 +452,12 @@ QUnit.test("Currency formatter", function(assert) {
   suite.add({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65", 
               "msg": "Length > 1 separators" });
   
-  suite.execute(Komunalne.format.currency, assert.buildFor("equal"));
+  suite.execute(assert.buildFor("equal"),Komunalne.format.currency);
 });
 
 QUnit.test("General testing to format functions", function(assert) {
   var suite = new Komunalne.test.Suite();
   suite.add({ "args": ["string"], "expected": "String", "msg": "Simple capitalization" });
   suite.add({ "args": ["sTrInG"], "expected": "String", "msg": "Capitalization of multiple uppercase string letters" });
-  suite.execute(Komunalne.format.capitalize, assert.buildFor("equal"));
+  suite.execute(assert.buildFor("equal"),Komunalne.format.capitalize);
 });
