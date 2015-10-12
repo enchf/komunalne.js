@@ -302,12 +302,19 @@ Komunalne.test.Case = function(config) {
  */
 Komunalne.test.Case.prototype.execute = function(verifier,method) {
   var vargs = [];
-  verifier = Komunalne.util.isFunction(verifier) ? new Komunalne.helper.Method(verifier) : verifier;
-  method = Komunalne.util.isFunction(method) ? new Komunalne.helper.Method(method) : method;
-  if (this.expected) vargs.push(this.expected);
-  if (method && this.args) vargs.push(method.apply(this.args));
-  if (this.msg) vargs.push(this.msg);
+  verifier = Komunalne.test.Case.transform(verifier);
+  method = Komunalne.test.Case.transform(method);
+  if (this.expected !== undefined) vargs.push(this.expected);
+  if (method && Komunalne.util.isArray(this.args)) vargs.push(method.apply(this.args));
+  if (this.msg != undefined) vargs.push(this.msg.toString());
   verifier.apply(vargs);
+};
+
+/**
+ * Transforms a function into a K.helper.Method object if needed.
+ */
+Komunalne.test.Case.transform = function(fn) {
+  return Komunalne.util.isFunction(fn) ? new Komunalne.helper.Method(fn) : fn;
 };
 
 /**
@@ -332,6 +339,8 @@ Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
  */
 Komunalne.test.Suite.prototype.execute = function(verifier,method) {
   var iterator = this.iterator();
+  verifier = Komunalne.test.Case.transform(verifier);
+  method = Komunalne.test.Case.transform(method);
   while (iterator.hasNext()) {
     iterator.next().execute(verifier,method);
   }
