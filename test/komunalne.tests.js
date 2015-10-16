@@ -84,7 +84,7 @@ QUnit.test("Unit test executor", function(assert) {
 });
 
 QUnit.test("Iterator implementation", function(assert) {
-  var a,b,c,d,e,f,g,h;
+  var a,b,c,d,e,f,g,h,v,w;
   var nextError = Komunalne.helper.Iterator.nextError;
   var keyError = Komunalne.helper.Iterator.keyError;
   
@@ -96,6 +96,10 @@ QUnit.test("Iterator implementation", function(assert) {
   f = new Komunalne.helper.Iterator(testData.array);
   g = new Komunalne.helper.Iterator();
   h = (function() { return new Komunalne.helper.Iterator(arguments); })(4,5,6);
+  v = [1,2,3];
+  v.a = "1";
+  v.b = 5;
+  w = new Komunalne.helper.Iterator(v);
   
   // Wrapper for the exception tests.
   var wrapper = function(iterator) { return function() { iterator.next(); }; };
@@ -107,6 +111,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(d.hasNext(),true,"Non empty array has next item");
   assert.strictEqual(g.hasNext(),false,"No next item on empty arguments iterator");
   assert.strictEqual(h.hasNext(),true,"Arguments iterator has next item");
+  assert.strictEqual(w.hasNext(),true,"Array with properties iterator has next item");
   
   assert.strictEqual(a.length(),0,"Length of empty object is 0");
   assert.strictEqual(b.length(),4,"Length of test data object");
@@ -114,6 +119,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(d.length(),3,"Length of test array");
   assert.strictEqual(g.length(),0,"Length of empty arguments iterator is 0");
   assert.strictEqual(h.length(),3,"Length of arguments iterator");
+  assert.strictEqual(w.length(),5,"Length of array with properties iterator");
   
   assert.throws(keyWrapper(a),Komunalne.helper.Iterator.keyError,
                 "Exception calling currenty key before next, empty object iterator");
@@ -127,6 +133,8 @@ QUnit.test("Iterator implementation", function(assert) {
                 "Exception calling currenty key before next, empty arguments iterator");
   assert.throws(keyWrapper(h),Komunalne.helper.Iterator.keyError,
                 "Exception calling currenty key before next, arguments iterator");
+  assert.throws(keyWrapper(w),Komunalne.helper.Iterator.keyError,
+                "Exception calling current key before next, array with properties iterator");
   
   assert.strictEqual(b.next(),1,"First item retrieval on object iterator");
   assert.equal(b.currentKey(),"a","First item key on object iterator");
@@ -134,6 +142,8 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.equal(d.currentKey(),0,"First item key on array iterator");
   assert.strictEqual(h.next(),4,"First item retrieval on arguments iterator");
   assert.equal(h.currentKey(),0,"First item key on array iterator");
+  assert.strictEqual(w.next(),1,"First item retrieval on array with properties iterator");
+  assert.equal(w.currentKey(),0,"First key on array with properties should be the index 0");
   
   assert.strictEqual(b.remaining(),3,"Remaining function working properly on object iterator");
   assert.strictEqual(d.remaining(),2,"Remaining function working properly on array iterator");
@@ -142,6 +152,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(h.length(),3,"Length unchanged after moving forward on arguments iterator");
   assert.strictEqual(e.remaining(),4,"Iterator created with same object unchanged after move forward");
   assert.strictEqual(f.remaining(),3,"Iterator created with same array unchanged after move forward");
+  assert.strictEqual(w.remaining(),4,"Remaining function working properly on array with properties iterator");
   
   assert.throws(wrapper(a),nextError + "0","Exception thrown calling next on empty object iterator");
   assert.throws(wrapper(c),nextError + "0","Exception thrown calling next on empty array iterator");
@@ -175,6 +186,15 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(h.length(),3,"Length unchanged after exhausting arguments iterator");
   assert.strictEqual(h.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted arguments iterator");
   assert.strictEqual(h.hasNext(),false,"No next element on exhausted arguments iterator");
+  
+  assert.strictEqual(w.next(),2,"Retrieval order on array with properties iterator, second array element");
+  assert.equal(w.currentKey(),1,"Key order on array with properties iterator, second array element");
+  assert.strictEqual(w.next(),3,"Retrieval order on array with properties iterator, third array element");
+  assert.equal(w.currentKey(),2,"Key order on array with properties iterator, third array element");
+  assert.strictEqual(w.next(),"1","Retrieval order on array with properties iterator, first property element");
+  assert.strictEqual(w.currentKey(),"a","Key order on array with properties iterator, first property element");
+  assert.strictEqual(w.next(),5,"Retrieval order on array with properties iterator, second property element");
+  assert.strictEqual(w.currentKey(),"b","Key order on array with properties iterator, second property element");
 });
 
 QUnit.test("Append util function", function(assert) {

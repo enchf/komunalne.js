@@ -170,3 +170,24 @@ Komunalne.util.forEach = function(obj,fn,scope) {
     while (i.hasNext()) fn.call(scope,i.next(),i.currentKey(),obj);
   }
 };
+
+/**
+ * Clones an object by reference.
+ * If deep is set to true, the object properties are cloned recursively.
+ * The function takes care of circular references in deep cloning.
+ * The clone is newly created using original object constructor.
+ * In case of a non-object, it is returned itself.
+ */
+Komunalne.util.clone = function(obj,deep) {
+  var seen = [];
+  var clone = function(obj,deep) {
+    var c;
+    if (obj != null && Komunalne.util.isInstanceOf(obj,"object")) {
+      c = new obj.constructor();
+      for (var i in obj) {}
+      
+    } else c = obj;
+    return c;
+  };
+  return clone(obj,deep);
+};
