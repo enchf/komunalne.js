@@ -535,6 +535,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notStrictEqual(b.b,w.b,"Changing original array with properties, checking properties in deep clone");
   assert.notOk(w.d,"Property added to original array with properties not defined in clone");
   
+  /* Cloning a custom type object */
   w = Komunalne.util.clone(d);
   assert.ok(Komunalne.util.isInstanceOf(w,c),"Ensuring type is correctly set");
   assert.deepEqual(w,d,"Ensuring the custom object is cloned");
@@ -545,21 +546,52 @@ QUnit.test("Cloning objects", function(assert) {
   d.d = -1; d.a = -2;
   assert.strictEqual(3,count(w),"Total number of keys in clone after altering the original");
   assert.notOk(w.d,"New attribute set in original not in clone");
-  assert.notDeepEqual(w,d,"Ensuring the custom object is cloned");
+  assert.notDeepEqual(w,d,"Clone not equal after modifying the original");
   assert.notStrictEqual(w.a,d.a,"Properties in the cloned custom object: Set in constructor");
   
+  /* Cloning a custom type object with deep flag */
+  d = new c(); d.b = 3; d.c = 4;
+  w = Komunalne.util.clone(d);
+  assert.ok(Komunalne.util.isInstanceOf(w,c),"Type is correctly set when deep flag is on");
+  assert.deepEqual(w,d,"Ensuring the custom object is deep cloned");
+  assert.strictEqual(w.a,1,"Properties in the deep cloned custom object: Set in constructor");
+  assert.strictEqual(w.b,3,"Properties in the deep cloned custom object: prototype one changed");
+  assert.strictEqual(w.c,4,"Properties in the deep cloned custom object: Added after constructor");
+  assert.strictEqual(3,count(w),"Total number of keys in deep clone");
+  d.d = 11; d.a = 22;
+  assert.strictEqual(3,count(w),"Total number of keys in deep clone after altering the original");
+  assert.notOk(w.d,"New attribute set in original not in deep clone");
+  assert.notDeepEqual(w,d,"Deep clone not equal after modifying the original");
+  assert.notStrictEqual(w.a,d.a,"Properties in the deep cloned custom object: Set in constructor");
+  
+  /* Cloning a custom type object - II */
   w = Komunalne.util.clone(e);
-  assert.ok(Komunalne.util.isInstanceOf(w,c),"Ensuring type is correctly set");
-  assert.deepEqual(w,e,"Ensuring the custom object is cloned");
-  assert.strictEqual(w.a,1,"Properties in the cloned custom object: Set in constructor");
-  assert.strictEqual(w.b,2,"Properties in the cloned custom object: prototype one changed");
-  assert.notOk(w.c,"Properties not set in original nor in clone");
-  assert.strictEqual(2,count(w),"Total number of keys in clone");
+  assert.ok(Komunalne.util.isInstanceOf(w,c),"Custom type set in clone");
+  assert.deepEqual(w,e,"Ensuring the second custom object is cloned");
+  assert.strictEqual(w.a,1,"Properties in the second cloned custom object: Set in constructor");
+  assert.strictEqual(w.b,2,"Properties in the second cloned custom object: prototype one changed");
+  assert.notOk(w.c,"Properties not set in original nor in second object clone");
+  assert.strictEqual(2,count(w),"Total number of keys in second object clone");
   e.d = -1; e.a = -2;
-  assert.strictEqual(2,count(w),"Total number of keys in clone after altering the original");
-  assert.notOk(w.d,"New attribute set in original not in clone");
-  assert.notDeepEqual(w,e,"Ensuring the custom object is cloned");
-  assert.notStrictEqual(w.a,e.a,"Properties in the cloned custom object: Set in constructor");
+  assert.strictEqual(2,count(w),"Total number of keys in second object clone after altering the original");
+  assert.notOk(w.d,"New attribute set in original not in second object clone");
+  assert.notDeepEqual(w,e,"Ensuring the second custom object is cloned");
+  assert.notStrictEqual(w.a,e.a,"Properties in the second cloned custom object: Set in constructor");
+  
+  /* Cloning a custom type object with deep flag - II */
+  e = new c();
+  w = Komunalne.util.clone(e,true);
+  assert.ok(Komunalne.util.isInstanceOf(w,c),"Custom type set in deep clone");
+  assert.deepEqual(w,e,"Ensuring the second custom object is deep cloned");
+  assert.strictEqual(w.a,1,"Properties in the second deep cloned custom object: Set in constructor");
+  assert.strictEqual(w.b,2,"Properties in the second deep cloned custom object: prototype one changed");
+  assert.notOk(w.c,"Properties not set in original nor in second object deep clone");
+  assert.strictEqual(2,count(w),"Total number of keys in second object deep clone");
+  e.d = -1; e.a = -2;
+  assert.strictEqual(2,count(w),"Total number of keys in second object deep clone after altering the original");
+  assert.notOk(w.d,"New attribute set in original not in second object deep clone");
+  assert.notDeepEqual(w,e,"Ensuring the second custom object is deep cloned");
+  assert.notStrictEqual(w.a,e.a,"Properties in the second deep cloned custom object: Set in constructor");
 });
 
 QUnit.test("Currency formatter", function(assert) {
