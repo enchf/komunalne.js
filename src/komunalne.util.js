@@ -157,36 +157,42 @@ Komunalne.util.arrayConcat = function() {
 
 /**
  * For each method that works both on objects or array/arguments.
+ * It uses a K.helper.Iterator in case of arrays to include not only indexes but added properties (i.e. [].b = 1).
  * The method passes the arguments to the callback function in the same way as native Array.forEach does:
  * - value: The value element.
  * - key: Index for arrays and key for objects.
  * - object: The iterated array or object.
  */
 Komunalne.util.forEach = function(obj,fn,scope) {
-  var i;
-  if (Komunalne.util.isArray(obj)) obj.forEach(fn,scope);
-  else {
-    i = new Komunalne.helper.Iterator(obj);
-    while (i.hasNext()) fn.call(scope,i.next(),i.currentKey(),obj);
-  }
+  var i = new Komunalne.helper.Iterator(obj);
+  while (i.hasNext()) fn.call(scope,i.next(),i.currentKey(),obj);
 };
 
 /**
- * Clones an object by reference.
- * If deep is set to true, the object properties are cloned recursively.
+ * Clones an object. If deep is set to true, the object properties are cloned recursively.
+ * Otherwise, the object is replicated into a new one by reference.
  * The function takes care of circular references in deep cloning.
  * The clone is newly created using original object constructor.
  * In case of a non-object, it is returned itself.
  */
 Komunalne.util.clone = function(obj,deep) {
   var seen = [];
+  var clones = [];
   var clone = function(obj,deep) {
-    var c;
-    if (obj != null && Komunalne.util.isInstanceOf(obj,"object")) {
+    var replica,refer;
+    var c,i,fn;
+    if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
+    else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
+    else if (deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
+    else {
       c = new obj.constructor();
-      for (var i in obj) {}
-      
-    } else c = obj;
+      seen.push(obj);
+      clones.push(c);
+      replica = function(val,key) { c[key] = clone(val,deep); };
+      refer = function(val,key) { c[key] = val; };
+      fn = deep === true ? replica : refer;
+      Komunalne.util.forEach(obj,fn);
+    }
     return c;
   };
   return clone(obj,deep);

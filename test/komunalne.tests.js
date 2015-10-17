@@ -433,6 +433,135 @@ QUnit.test("For each function for objects, arguments and arrays", function(asser
   assert.strictEqual(f.keys,"ab","For each with scope and object: keys");
 });
 
+QUnit.test("Cloning objects", function(assert) {
+  var a = [1,2,3];
+  var b = [4,5,6]; b.a = "7"; b.b = 8;
+  var c = function() { this.a = 1; }; c.prototype.b = 2;
+  var d = new c(); d.b = 3; d.c = 4;
+  var e = new c();
+  var f = { a: 1, b: false, c: { x: 9, y: [] }, d: function(x) { return x; } };
+  var g = new Date();
+  var i = [{a:1},2,{b:2}];
+  var j = {a:0,b:1};
+  var w,suite,count = function(arr) { var y = 0; for (var x in arr) y++; return y; };
+  
+  suite = new Komunalne.test.Suite();
+  suite.add({ "args": [1], "expected": 1, "msg": "Cloning a number" });
+  suite.add({ "args": [1,true], "expected": 1, "msg": "Cloning 'deep' a number" });
+  suite.add({ "args": [true], "expected": true, "msg": "Cloning a boolean" });
+  suite.add({ "args": [false,true], "expected": false, "msg": "Cloning 'deep' a boolean" });
+  suite.add({ "args": [c], "expected": c, "msg": "Cloning a function" });
+  suite.add({ "args": [c,true], "expected": c, "msg": "Cloning 'deep' a function" });
+  suite.add({ "args": [null], "expected": null, "msg": "Cloning null" });
+  suite.add({ "args": [null,true], "expected": null, "msg": "Cloning 'deep' null" });
+  suite.add({ "args": ["str"], "expected": "str", "msg": "Cloning a string" });
+  suite.add({ "args": ["str",true], "expected": "str", "msg": "Cloning 'deep' a string" });
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.clone);
+  
+  w = Komunalne.util.clone(undefined);
+  assert.strictEqual(w,undefined,"Cloning undefined");
+  w = Komunalne.util.clone(undefined,true);
+  assert.strictEqual(w,undefined,"Cloning 'deep' undefined");
+  w = Komunalne.util.clone(g);
+  assert.strictEqual(w.getTime(),g.getTime(),"Cloning a Date");
+  w = Komunalne.util.clone(g,true);
+  assert.strictEqual(w.getTime(),g.getTime(),"Cloning 'deep' a Date");
+  
+  /* Cloning an array */
+  w = Komunalne.util.clone(a);
+  assert.ok(Komunalne.util.isArray(w),"Ensuring an array is cloned");
+  assert.deepEqual(a,w,"Cloning an array by reference");
+  assert.strictEqual(a.length,w.length,"Cloning an array by reference: length");
+  assert.strictEqual(a[1],w[1],"Cloning an array by reference: Random index");
+  assert.strictEqual(3,count(w),"Total number of keys in a cloned array");
+  a.push(4);
+  a[1] = 4;
+  assert.strictEqual(3,count(w),"Total number of keys in a cloned array after altering the original");
+  assert.notDeepEqual(a,w,"Changing original array, checking clone not affected");
+  assert.notStrictEqual(a.length,w.length,"Changing original array, checking clone not affected: length");
+  assert.notStrictEqual(a[1],w[1],"Changing original array, checking clone not affected: Random index");
+  
+  /* Cloning an array with deep flag */
+  w = Komunalne.util.clone(a,true);
+  assert.ok(Komunalne.util.isArray(w),"Ensuring an array is 'deep' cloned");
+  assert.deepEqual(a,w,"Cloning deep an array by reference");
+  assert.strictEqual(a.length,w.length,"Cloning deep an array by reference: length");
+  assert.strictEqual(a[1],w[1],"Cloning deep an array by reference: Random index");
+  assert.strictEqual(4,count(w),"Total number of keys in a deep cloned array");
+  a.push(5);
+  a[1] = 8;
+  assert.strictEqual(4,count(w),"Total number of keys in a deep cloned array after altering the original");
+  assert.notDeepEqual(a,w,"Changing original array, checking deep clone not affected");
+  assert.notStrictEqual(a.length,w.length,"Changing original array, checking deep clone not affected: length");
+  assert.notStrictEqual(a[1],w[1],"Changing original array, checking deep clone not affected: Random index");
+  
+  /* Cloning an array with properties */
+  w = Komunalne.util.clone(b);
+  assert.ok(Komunalne.util.isArray(w),"Array with properties type is cloned");
+  assert.deepEqual(b,w,"Cloning an array with properties by reference");
+  assert.strictEqual(b.length,w.length,"Cloning an array with properties by reference: length");
+  assert.strictEqual(b[1],w[1],"Cloning an array with properties by reference: Random index");
+  assert.strictEqual(b.b,w.b,"Cloning an array with properties by reference: Random index");
+  assert.strictEqual(5,count(w),"Total number of keys in a cloned array with properties");
+  b.push(4);
+  b[1] = 4;
+  b.b = 9;
+  b.c = 3;
+  assert.strictEqual(5,count(w),"Total number of keys in a cloned array with properties after altering the original");
+  assert.notDeepEqual(b,w,"Changing cloned array, checking clone not affected");
+  assert.notStrictEqual(b.length,w.length,"Changing cloned array, checking clone not affected: length");
+  assert.notStrictEqual(b[1],w[1],"Changing cloned array, checking clone not affected: Random index");
+  assert.strictEqual(b.a,w.a,"Changing cloned array, checking clone not affected: Random index");
+  assert.notStrictEqual(b.b,w.b,"Changing cloned array, checking clone not affected: Random index");
+  assert.notOk(w.c,"Not defined property added to original array");
+  
+  /* Cloning an array with properties with deep flag */
+  w = Komunalne.util.clone(b,true);
+  assert.ok(Komunalne.util.isArray(w),"Array with properties type is 'deep' cloned");
+  assert.deepEqual(b,w,"Cloning with deep flag an array with properties by reference");
+  assert.strictEqual(b.length,w.length,"Cloning with deep flag an array with properties by reference: length");
+  assert.strictEqual(b[1],w[1],"Cloning with deep flag an array with properties by reference: Random index");
+  assert.strictEqual(b.b,w.b,"Cloning with deep flag an array with properties by reference: Random index");
+  assert.strictEqual(7,count(w),"Total number of keys in a deep cloned array with properties");
+  b.push(5);
+  b[1] = 8;
+  b.b = 11;
+  b.d = 12;
+  assert.strictEqual(7,count(w),"Total number of keys in a deep cloned array with properties altering the original");
+  assert.notDeepEqual(b,w,"Changing original array with properties, checking deep clone not affected");
+  assert.notStrictEqual(b.length,w.length,"Changing original array with properties, checking deep clone length");
+  assert.notStrictEqual(b[1],w[1],"Changing original array with properties, checking indexes in deep clone");
+  assert.strictEqual(b.a,w.a,"Changing original array with properties, checking properties in deep clone");
+  assert.notStrictEqual(b.b,w.b,"Changing original array with properties, checking properties in deep clone");
+  assert.notOk(w.d,"Property added to original array with properties not defined in clone");
+  
+  w = Komunalne.util.clone(d);
+  assert.ok(Komunalne.util.isInstanceOf(w,c),"Ensuring type is correctly set");
+  assert.deepEqual(w,d,"Ensuring the custom object is cloned");
+  assert.strictEqual(w.a,1,"Properties in the cloned custom object: Set in constructor");
+  assert.strictEqual(w.b,3,"Properties in the cloned custom object: prototype one changed");
+  assert.strictEqual(w.c,4,"Properties in the cloned custom object: Added after constructor");
+  assert.strictEqual(3,count(w),"Total number of keys in clone");
+  d.d = -1; d.a = -2;
+  assert.strictEqual(3,count(w),"Total number of keys in clone after altering the original");
+  assert.notOk(w.d,"New attribute set in original not in clone");
+  assert.notDeepEqual(w,d,"Ensuring the custom object is cloned");
+  assert.notStrictEqual(w.a,d.a,"Properties in the cloned custom object: Set in constructor");
+  
+  w = Komunalne.util.clone(e);
+  assert.ok(Komunalne.util.isInstanceOf(w,c),"Ensuring type is correctly set");
+  assert.deepEqual(w,e,"Ensuring the custom object is cloned");
+  assert.strictEqual(w.a,1,"Properties in the cloned custom object: Set in constructor");
+  assert.strictEqual(w.b,2,"Properties in the cloned custom object: prototype one changed");
+  assert.notOk(w.c,"Properties not set in original nor in clone");
+  assert.strictEqual(2,count(w),"Total number of keys in clone");
+  e.d = -1; e.a = -2;
+  assert.strictEqual(2,count(w),"Total number of keys in clone after altering the original");
+  assert.notOk(w.d,"New attribute set in original not in clone");
+  assert.notDeepEqual(w,e,"Ensuring the custom object is cloned");
+  assert.notStrictEqual(w.a,e.a,"Properties in the cloned custom object: Set in constructor");
+});
+
 QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
   
@@ -461,6 +590,8 @@ QUnit.test("Currency formatter", function(assert) {
   suite.add({ "args": [-1.999], "expected": "-2.00", "msg": "Negative complex round" });
   
   // formatter changing default parameters.
+  suite.add({ "args": [1.2333,0], "expected": "1", "msg": "0 decimals" });
+  suite.add({ "args": [1001.2333,0,".","-"], "expected": "1-001", "msg": "0 decimals and custom thousands separator" });
   suite.add({ "args": [1.234444,3], "expected": "1.234", "msg": "3 decimals round down" });
   suite.add({ "args": [1.234567,4], "expected": "1.2346", "msg": "4 decimals round up" });
   suite.add({ "args": [0.000001,3], "expected": "0.000", "msg": "Round down to 0" });
