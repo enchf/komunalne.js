@@ -648,6 +648,25 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notDeepEqual(w[2],i[2],"Change in cloned object element is not reflected after deep cloning");
   assert.notStrictEqual(w[3].length,i[3].length,"Change in cloned array element is not reflected after deep cloning");
   assert.notDeepEqual(w[3],i[3],"Change in cloned array element is not reflected after deep cloning");
+  
+  /* Object with circular reference cloning by reference */
+  w = Komunalne.util.clone(k);
+  assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced clone type");
+  assert.ok(j === w.x,"Circular object first reference is exactly the same object in clone");
+  assert.ok(w.x.c === w.x,"Circular object second reference is exactly the same object in clone");
+  j.d = 5;
+  assert.strictEqual(5,w.x.d,"Change in circular referenced object is reflected in clone");
+  k.x.d = 15;
+  assert.strictEqual(j.d,w.x.c.d,"Change in circular referenced object is reflected in clone");
+  
+  w = Komunalne.util.clone(k,true);
+  assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced deep clone type");
+  assert.notOk(j === w.x,"Circular object first reference is a different object in deep clone");
+  assert.ok(w.x.c === w.x,"Circular object second reference is the same clone referenced in clone itself");
+  j.e = 10;
+  assert.notStrictEqual(10,w.x.e,"Change in circular referenced object is not reflected in deep clone");
+  w.x.d = 25;
+  assert.strictEqual(w.x.d,w.x.c.d,"Change in circular referenced object is reflected in deep clone reference");
 });
 
 QUnit.test("Currency formatter", function(assert) {
