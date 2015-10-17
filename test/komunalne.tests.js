@@ -439,10 +439,11 @@ QUnit.test("Cloning objects", function(assert) {
   var c = function() { this.a = 1; }; c.prototype.b = 2;
   var d = new c(); d.b = 3; d.c = 4;
   var e = new c();
-  var f = { a: 1, b: false, c: { x: 9, y: [] }, d: function(x) { return x; } };
+  var f = { a: 1, b: false, c: { x: 9, y: [0] }, d: function(x) { return x; } };
   var g = new Date();
-  var i = [{a:1},2,{b:2}];
+  var i = [{a:1},2,{b:2},[1,2]];
   var j = {a:0,b:1};
+  var k = {x:j}; k.x.c = j;
   var w,suite,count = function(arr) { var y = 0; for (var x in arr) y++; return y; };
   
   suite = new Komunalne.test.Suite();
@@ -592,6 +593,61 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.d,"New attribute set in original not in second object deep clone");
   assert.notDeepEqual(w,e,"Ensuring the second custom object is deep cloned");
   assert.notStrictEqual(w.a,e.a,"Properties in the second deep cloned custom object: Set in constructor");
+  
+  /* Cloning an object with object and array subproperties */
+  w = Komunalne.util.clone(f);
+  assert.ok(Komunalne.util.isInstanceOf(w,Object),"Object type set when cloning");
+  assert.deepEqual(w,f,"Deep equal check for cloned object");
+  assert.strictEqual(w.b,false,"Checking properties of cloned object");
+  assert.ok(Komunalne.util.isInstanceOf(w.d,"function"),"Checking function attribute cloning");
+  assert.strictEqual(w.c.x,9,"Cloned subproperty correctly set");
+  assert.ok(Komunalne.util.isArray(w.c.y),"Array subproperty correctly set in clone");
+  assert.strictEqual(w.c.y.length,f.c.y.length,"Array remains the same length in clone");
+  assert.ok(f.c === w.c,"Subobjects copied by reference in not deep clone are exactly the same");
+  f.a = 2; f.c.x = 10; f.c.y.push(1);
+  assert.notStrictEqual(w.a,f.a,"Changed property in original object not changed in clone");
+  assert.strictEqual(w.c.x,f.c.x,"Changed object property copied by reference in original object is changed in clone");
+  assert.strictEqual(w.c.y.length,f.c.y.length,"Modified sub property array is changed in clone");
+  
+  /* Deep cloning an object with object and array subproperties */
+  w = Komunalne.util.clone(f,true);
+  assert.ok(Komunalne.util.isInstanceOf(w,Object),"Object type set when deep cloning");
+  assert.deepEqual(w,f,"Deep equal check for deep cloned object");
+  assert.strictEqual(w.b,false,"Checking properties of deep cloned object");
+  assert.ok(Komunalne.util.isInstanceOf(w.d,"function"),"Checking function attribute deep cloning");
+  assert.strictEqual(w.c.x,10,"Deep cloned subproperty correctly set");
+  assert.ok(Komunalne.util.isArray(w.c.y),"Array subproperty correctly set in deep clone");
+  assert.strictEqual(w.c.y.length,f.c.y.length,"Array remains the same length in deep clone");
+  assert.notOk(f.c === w.c,"Subobjects cloned in deep clone are different objects");
+  f.a = 3; f.c.x = 20; f.c.y.push(2);
+  assert.notDeepEqual(w.a,f.a,"Changed property in original object not changed in clone");
+  assert.notStrictEqual(w.c.x,f.c.x,"Changed object property in original object is not changed in deep clone");
+  assert.notStrictEqual(w.c.y.length,f.c.y.length,"Modified sub property array is not changed in deep clone");
+  
+  /* Cloning an array with object elements */
+  w = Komunalne.util.clone(i);
+  assert.ok(Komunalne.util.isArray(w),"Check that the array type is set in clone");
+  assert.deepEqual(w,i,"Deep equal check for cloned array");
+  assert.strictEqual(w.length,i.length,"Length equal in clone and original array");
+  assert.deepEqual(w[2],i[2],"Deep equal of object elements in clone");
+  assert.ok(w[0] === i[0],"Array elements copied by reference in not deep clone are exactly the same");
+  i.push(4); i[0].a = -10; i[3].push(100);
+  assert.notStrictEqual(w.length,i.length,"Cloned array length remains the same after pushing element in original one");
+  assert.deepEqual(w[0],i[0],"Change in object element copied by reference is reflected in clone");
+  assert.strictEqual(w[3].length,i[3].length,"Change in array element copied by reference is reflected in clone");
+  assert.deepEqual(w[3],i[3],"Change in array element copied by reference is reflected in clone");
+  
+  w = Komunalne.util.clone(i,true);
+  assert.ok(Komunalne.util.isArray(w),"Check that the array type is set in deep clone");
+  assert.deepEqual(w,i,"Deep equal check for deep cloned array");
+  assert.strictEqual(w.length,i.length,"Length equal in deep clone and original array");
+  assert.deepEqual(w[2],i[2],"Deep equal of object elements in deep clone");
+  assert.notOk(w[0] === i[0],"Array object elements cloned deep clone are different objects");
+  i.push(5); i[2].b = -20; i[3].push(200);
+  assert.notStrictEqual(w.length,i.length,"Cloned array length remains the same after pushing element in original one");
+  assert.notDeepEqual(w[2],i[2],"Change in cloned object element is not reflected after deep cloning");
+  assert.notStrictEqual(w[3].length,i[3].length,"Change in cloned array element is not reflected after deep cloning");
+  assert.notDeepEqual(w[3],i[3],"Change in cloned array element is not reflected after deep cloning");
 });
 
 QUnit.test("Currency formatter", function(assert) {
