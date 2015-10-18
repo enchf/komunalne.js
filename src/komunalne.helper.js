@@ -22,10 +22,9 @@ Komunalne.helper.Method.prototype.call = function() { return this.fn.apply(this.
  * Java-like Iterator implementation for arrays and objects.
  */
 Komunalne.helper.Iterator = function(object) {
-  this.keys = [];
+  this.keys = Komunalne.util.keys(object);
   this.i = 0;
-  this.ref = (object || []);
-  for (var x in object) this.keys.push(x);
+  this.ref = object;
 };
 
 /* Statics */

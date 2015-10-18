@@ -212,3 +212,13 @@ Komunalne.util.clone = function(obj,cfg) {
   };
   return clone(obj,cfg);
 };
+
+/**
+ * Return the keys of an object/array.
+ */
+Komunalne.util.keys = function(obj) {
+  var keys = [];
+  obj = (obj || {});
+  for (var x in obj) keys.push(x);
+  return keys;
+};

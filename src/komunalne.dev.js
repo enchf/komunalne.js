@@ -35,10 +35,9 @@ Komunalne.helper.Method.prototype.call = function() { return this.fn.apply(this.
  * Java-like Iterator implementation for arrays and objects.
  */
 Komunalne.helper.Iterator = function(object) {
-  this.keys = [];
+  this.keys = Komunalne.util.keys(object);
   this.i = 0;
-  this.ref = (object || []);
-  for (var x in object) this.keys.push(x);
+  this.ref = object;
 };
 
 /* Statics */
@@ -291,6 +290,16 @@ Komunalne.util.clone = function(obj,cfg) {
     return c;
   };
   return clone(obj,cfg);
+};
+
+/**
+ * Return the keys of an object/array.
+ */
+Komunalne.util.keys = function(obj) {
+  var keys = [];
+  obj = (obj || {});
+  for (var x in obj) keys.push(x);
+  return keys;
 };
 
 /**
