@@ -448,24 +448,24 @@ QUnit.test("Cloning objects", function(assert) {
   
   suite = new Komunalne.test.Suite();
   suite.add({ "args": [1], "expected": 1, "msg": "Cloning a number" });
-  suite.add({ "args": [1,true], "expected": 1, "msg": "Cloning 'deep' a number" });
+  suite.add({ "args": [1,{ "deep": true }], "expected": 1, "msg": "Cloning 'deep' a number" });
   suite.add({ "args": [true], "expected": true, "msg": "Cloning a boolean" });
-  suite.add({ "args": [false,true], "expected": false, "msg": "Cloning 'deep' a boolean" });
+  suite.add({ "args": [false,{ "deep": true }], "expected": false, "msg": "Cloning 'deep' a boolean" });
   suite.add({ "args": [c], "expected": c, "msg": "Cloning a function" });
-  suite.add({ "args": [c,true], "expected": c, "msg": "Cloning 'deep' a function" });
+  suite.add({ "args": [c,{ "deep": true }], "expected": c, "msg": "Cloning 'deep' a function" });
   suite.add({ "args": [null], "expected": null, "msg": "Cloning null" });
-  suite.add({ "args": [null,true], "expected": null, "msg": "Cloning 'deep' null" });
+  suite.add({ "args": [null,{ "deep": true }], "expected": null, "msg": "Cloning 'deep' null" });
   suite.add({ "args": ["str"], "expected": "str", "msg": "Cloning a string" });
-  suite.add({ "args": ["str",true], "expected": "str", "msg": "Cloning 'deep' a string" });
+  suite.add({ "args": ["str",{ "deep": true }], "expected": "str", "msg": "Cloning 'deep' a string" });
   suite.execute(assert.buildFor("strictEqual"),Komunalne.util.clone);
   
   w = Komunalne.util.clone(undefined);
   assert.strictEqual(w,undefined,"Cloning undefined");
-  w = Komunalne.util.clone(undefined,true);
+  w = Komunalne.util.clone(undefined,{ "deep": true });
   assert.strictEqual(w,undefined,"Cloning 'deep' undefined");
   w = Komunalne.util.clone(g);
   assert.strictEqual(w.getTime(),g.getTime(),"Cloning a Date");
-  w = Komunalne.util.clone(g,true);
+  w = Komunalne.util.clone(g,{ "deep": true });
   assert.strictEqual(w.getTime(),g.getTime(),"Cloning 'deep' a Date");
   
   /* Cloning an array */
@@ -483,7 +483,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notStrictEqual(a[1],w[1],"Changing original array, checking clone not affected: Random index");
   
   /* Cloning an array with deep flag */
-  w = Komunalne.util.clone(a,true);
+  w = Komunalne.util.clone(a,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Ensuring an array is 'deep' cloned");
   assert.deepEqual(a,w,"Cloning deep an array by reference");
   assert.strictEqual(a.length,w.length,"Cloning deep an array by reference: length");
@@ -517,7 +517,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.c,"Not defined property added to original array");
   
   /* Cloning an array with properties with deep flag */
-  w = Komunalne.util.clone(b,true);
+  w = Komunalne.util.clone(b,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Array with properties type is 'deep' cloned");
   assert.deepEqual(b,w,"Cloning with deep flag an array with properties by reference");
   assert.strictEqual(b.length,w.length,"Cloning with deep flag an array with properties by reference: length");
@@ -581,7 +581,7 @@ QUnit.test("Cloning objects", function(assert) {
   
   /* Cloning a custom type object with deep flag - II */
   e = new c();
-  w = Komunalne.util.clone(e,true);
+  w = Komunalne.util.clone(e,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,c),"Custom type set in deep clone");
   assert.deepEqual(w,e,"Ensuring the second custom object is deep cloned");
   assert.strictEqual(w.a,1,"Properties in the second deep cloned custom object: Set in constructor");
@@ -610,7 +610,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(w.c.y.length,f.c.y.length,"Modified sub property array is changed in clone");
   
   /* Deep cloning an object with object and array subproperties */
-  w = Komunalne.util.clone(f,true);
+  w = Komunalne.util.clone(f,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Object type set when deep cloning");
   assert.deepEqual(w,f,"Deep equal check for deep cloned object");
   assert.strictEqual(w.b,false,"Checking properties of deep cloned object");
@@ -637,7 +637,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(w[3].length,i[3].length,"Change in array element copied by reference is reflected in clone");
   assert.deepEqual(w[3],i[3],"Change in array element copied by reference is reflected in clone");
   
-  w = Komunalne.util.clone(i,true);
+  w = Komunalne.util.clone(i,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Check that the array type is set in deep clone");
   assert.deepEqual(w,i,"Deep equal check for deep cloned array");
   assert.strictEqual(w.length,i.length,"Length equal in deep clone and original array");
@@ -659,7 +659,7 @@ QUnit.test("Cloning objects", function(assert) {
   k.x.d = 15;
   assert.strictEqual(j.d,w.x.c.d,"Change in circular referenced object is reflected in clone");
   
-  w = Komunalne.util.clone(k,true);
+  w = Komunalne.util.clone(k,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced deep clone type");
   assert.notOk(j === w.x,"Circular object first reference is a different object in deep clone");
   assert.ok(w.x.c === w.x,"Circular object second reference is the same clone referenced in clone itself");

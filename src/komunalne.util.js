@@ -169,31 +169,46 @@ Komunalne.util.forEach = function(obj,fn,scope) {
 };
 
 /**
- * Clones an object. If deep is set to true, the object properties are cloned recursively.
- * Otherwise, the object is replicated into a new one by reference.
+ * Clones an object, according to the configuration object, as defined below:
+ * - deep: If present and set to true, it will clone the objects within the cloned object recursively.
+ *         Otherwise, the subobjects and arrays are copied by reference.
+ * - into: If present and its an object instance, object properties are either cloned or copied
+ *         (depending on the deep flag) into this one instead of creating a new instance.
+ *         Otherwise, the cloned object is newly created using original object constructor.
+ *         This flag is only valid for the uppermost parent object (the one which the function has invoked).
+ *         For sub-objects, always a newly object is created using constructor.
+ * - safe: True to clone/copy only the non-present properties in the target object.
+ *         Applicable only if into is set.
  * The function takes care of circular references in deep cloning.
- * The clone is newly created using original object constructor.
- * In case of a non-object, it is returned itself.
+ * If object is not an object or a null/undefined reference, it is returned itself.
  */
-Komunalne.util.clone = function(obj,deep) {
+Komunalne.util.clone = function(obj,cfg) {
   var seen = [];
   var clones = [];
-  var clone = function(obj,deep) {
-    var replica,refer;
+  var first = true;
+  cfg = (cfg || {});
+  var clone = function(obj,cfg) {
+    var replica,refer,wrapper;
     var c,i,fn;
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
-    else if (deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
+    else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
     else {
-      c = new obj.constructor();
+      c = (first && cfg.into != null && Komunalne.util.isInstanceOf(cfg.into,"object")) ? 
+        cfg.into :
+        new obj.constructor();
+      first = false;
       seen.push(obj);
       clones.push(c);
-      replica = function(val,key) { c[key] = clone(val,deep); };
-      refer = function(val,key) { c[key] = val; };
-      fn = deep === true ? replica : refer;
-      Komunalne.util.forEach(obj,fn);
+      replica = function(val) { return clone(val,cfg); };
+      refer = function(val) { return val; };
+      fn = cfg.deep === true ? replica : refer;
+      wrapper = function(val,key) {
+        c[key] = (cfg.safe !== true || c[key] === undefined) ? fn(val) : c[key];
+      };
+      Komunalne.util.forEach(obj,wrapper);
     }
     return c;
   };
-  return clone(obj,deep);
+  return clone(obj,cfg);
 };
