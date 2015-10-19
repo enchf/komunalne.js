@@ -704,6 +704,11 @@ QUnit.test("Clone into an existing object", function(assert) {
   assert.strictEqual(w.x,8,"Properties not in source remains the same");
   assert.strictEqual(w.y,9,"Properties not in source remains the same");
   assert.deepEqual(Komunalne.util.keys(w),["x","y","a","b"],"Only the keys of source object are set");
+  
+  w = Komunalne.util.clone(a,{"into":null, "deep": true});
+  assert.notOk(w === a,"Newly generated object when passing non-object as target object");
+  assert.strictEqual(w.a,1,"Copied properties correctly");
+  assert.strictEqual(null,Komunalne.util.clone(null,{"into":{},"deep":true}),"Cloning null results in null");
 });
 
 QUnit.test("Number of keys function", function(assert) {
