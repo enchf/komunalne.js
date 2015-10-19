@@ -662,6 +662,8 @@ QUnit.test("Cloning objects", function(assert) {
   k.x.d = 15;
   assert.strictEqual(j.d,w.x.c.d,"Change in circular referenced object is reflected in clone");
   
+  /*var j = {a:0,b:1};
+  var k = {x:j}; k.x.c = j;*/
   w = Komunalne.util.clone(k,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced deep clone type");
   assert.notOk(j === w.x,"Circular object first reference is a different object in deep clone");
@@ -676,6 +678,14 @@ QUnit.test("Clone into an existing object", function(assert) {
   var a = {"a":1,"b":2};
   var b = {"x":8,"y":9};
   var c = {"a":3,"b":{"x":6,"y":7},"x":0};
+  var D = {};
+  D.custom = function(name) {
+    var obj = (Komunalne.util.isInstanceOf(this,D.custom)) ? this : new D.custom();
+    obj.name = name;
+    obj.default = {};
+    Komunalne.util.clone(obj,{ "into": obj.default });
+    return obj;
+  };
   var w;
   
   w = Komunalne.util.clone(a,{"into":{"a":0}});
@@ -705,10 +715,15 @@ QUnit.test("Clone into an existing object", function(assert) {
   assert.strictEqual(w.y,9,"Properties not in source remains the same");
   assert.deepEqual(Komunalne.util.keys(w),["x","y","a","b"],"Only the keys of source object are set");
   
-  w = Komunalne.util.clone(a,{"into":null, "deep": true});
-  assert.notOk(w === a,"Newly generated object when passing non-object as target object");
-  assert.strictEqual(w.a,1,"Copied properties correctly");
+  assert.throws(function() { Komunalne.util.clone(a,{"into":null, "deep": true}) },
+                Komunalne.util.clone.invalidTarget,
+                "Cloning into non object results in exception");
   assert.strictEqual(null,Komunalne.util.clone(null,{"into":{},"deep":true}),"Cloning null results in null");
+  
+  /* 
+   * Clones into an object which replicates itself internally.
+   */
+  w = Komunalne.util.clone(D.custom("test"));
 });
 
 QUnit.test("Number of keys function", function(assert) {

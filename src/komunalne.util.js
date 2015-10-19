@@ -187,6 +187,9 @@ Komunalne.util.clone = function(obj,cfg) {
   var clones = [];
   var first = true;
   cfg = (cfg || {});
+  if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
+    throw "Target object is null or not an object";
+  }
   var clone = function(obj,cfg) {
     var replica,refer,wrapper;
     var c,i,fn;
@@ -194,12 +197,9 @@ Komunalne.util.clone = function(obj,cfg) {
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
     else {
-      c = (first && cfg.into != null && Komunalne.util.isInstanceOf(cfg.into,"object")) ? 
-        cfg.into :
-        new obj.constructor();
-      first = false;
       seen.push(obj);
-      clones.push(c);
+      clones.push((c = (first && "into" in cfg) ? cfg.into : new obj.constructor()));
+      first = false;
       replica = function(val) { return clone(val,cfg); };
       refer = function(val) { return val; };
       fn = cfg.deep === true ? replica : refer;
