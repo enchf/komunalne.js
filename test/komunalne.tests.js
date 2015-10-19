@@ -662,8 +662,6 @@ QUnit.test("Cloning objects", function(assert) {
   k.x.d = 15;
   assert.strictEqual(j.d,w.x.c.d,"Change in circular referenced object is reflected in clone");
   
-  /*var j = {a:0,b:1};
-  var k = {x:j}; k.x.c = j;*/
   w = Komunalne.util.clone(k,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced deep clone type");
   assert.notOk(j === w.x,"Circular object first reference is a different object in deep clone");
@@ -678,9 +676,9 @@ QUnit.test("Clone into an existing object", function(assert) {
   var a = {"a":1,"b":2};
   var b = {"x":8,"y":9};
   var c = {"a":3,"b":{"x":6,"y":7},"x":0};
-  var D = {};
-  D.custom = function(name) {
-    var obj = (Komunalne.util.isInstanceOf(this,D.custom)) ? this : new D.custom();
+  var custom = {};
+  custom.D = function(name) {
+    var obj = (Komunalne.util.isInstanceOf(this,custom.D)) ? this : new custom.D();
     obj.name = name;
     obj.default = {};
     Komunalne.util.clone(obj,{ "into": obj.default });
@@ -723,7 +721,15 @@ QUnit.test("Clone into an existing object", function(assert) {
   /* 
    * Clones into an object which replicates itself internally.
    */
-  w = Komunalne.util.clone(D.custom("test"));
+  w = Komunalne.util.clone(custom.D("test"),{"deep": true});
+  assert.ok(Komunalne.util.isInstanceOf(w,custom.D),"Type of inner self replication object");
+  assert.strictEqual("test",w.name,"Properties replication");
+  assert.ok(w.default === w.default.default,"Inner self clone is the same instance as parent");
+  
+  w = Komunalne.util.clone(new custom.D("test"),{"into":{}});
+  assert.notOk(Komunalne.util.isInstanceOf(w,custom.D),"If target object is provided clone cannot be of the same type");
+  assert.strictEqual("test",w.name,"Properties replication into target object");
+  assert.notOk(w === w.default,"Provided target object is not the same as newly internally created target object");
 });
 
 QUnit.test("Number of keys function", function(assert) {
