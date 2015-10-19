@@ -675,13 +675,35 @@ QUnit.test("Cloning objects", function(assert) {
 QUnit.test("Clone into an existing object", function(assert) {
   var a = {"a":1,"b":2};
   var b = {"x":8,"y":9};
-  var c = {};
-  var d = {"a":3,"b":{"x":6,"y":7}};
+  var c = {"a":3,"b":{"x":6,"y":7},"x":0};
   var w;
   
   w = Komunalne.util.clone(a,{"into":{"a":0}});
   assert.strictEqual(w.a,1,"Properties overriden without safe flag");
   assert.strictEqual(w.b,2,"Properties copied into the target object");
+  assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Only the keys of source object are set");
+  
+  w = Komunalne.util.clone(a,{"into":{"a":0},"safe":true});
+  assert.strictEqual(w.a,0,"Properties not overriden with safe flag");
+  assert.strictEqual(w.b,2,"Properties copied into the target object");
+  assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Only the keys of source object are set");
+  
+  w = Komunalne.util.clone(c,{"into":b,"safe":true,"deep":true});
+  assert.notOk(c.b === w.b,"Inner object cloned with deep flag set to true");
+  assert.notOk(c.b === b.b,"Inner object cloned, original reference checked");
+  assert.ok(w === b,"Target object reference is the same as the one returned by the function");
+  assert.deepEqual(Komunalne.util.keys(w),["x","y","a","b"],"Keys in the target object deep cloned");
+  assert.strictEqual(w.x,8,"Properties not overriden with safe flag");
+  assert.strictEqual(w.y,9,"Existent properties remains the same");
+  assert.strictEqual(w.a,3,"Copied properties from source object");
+  assert.deepEqual(w.b,{"x":6,"y":7},"Cloned inner object in target object");
+  
+  w = Komunalne.util.clone(a,{"into": b});
+  assert.strictEqual(w.a,1,"Properties copied into the target object");
+  assert.strictEqual(w.b,2,"Properties copied into the target object");
+  assert.strictEqual(w.x,8,"Properties not in source remains the same");
+  assert.strictEqual(w.y,9,"Properties not in source remains the same");
+  assert.deepEqual(Komunalne.util.keys(w),["x","y","a","b"],"Only the keys of source object are set");
 });
 
 QUnit.test("Number of keys function", function(assert) {
