@@ -280,11 +280,13 @@ Komunalne.util.clone = function(obj,cfg) {
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
     else {
       seen.push(obj);
-      // If object is not an array and has a constructor with arguments, 
-      // as its impossible to recreate them, return the object itself.
-      c = (first && "into" in cfg) ? cfg.into :
-          (!Komunalne.util.isArray(obj) && !Komunalne.util.isInstanceOf(obj,Object) && obj.constructor.length > 0)
-          ? obj : new obj.constructor();
+      // The object is tried to be created using constructor.
+      // If something fails, the object is passed as reference.
+      if (first && "into" in cfg) c = cfg.into;
+      else {
+        try { c = new obj.constructor(); } 
+        catch (e) { c = obj; }
+      }
       clones.push(c);
       first = false;
       replica = function(val) { return clone(val,cfg); };
