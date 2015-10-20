@@ -143,14 +143,17 @@ Komunalne.util.isArray = function(obj) {
  * Checks an object against a specific type.
  * Scenarios:
  * - Param 'type' is string: Compares 'obj' as primitive using typeof against 'type'.
- * - Param 'type' is a function: Uses instanceof operator whatever type is 'obj'.
+ * - Param 'type' is a function: If obj is an object, compares obj.constructor with type.
+ *   Otherwise, uses instanceof operator against obj.
  * - Otherwise: Throws exception.
  */
 Komunalne.util.isInstanceOf = function(obj,type) {
   var res;
   if (typeof type == "string") res = (typeof obj == type);
-  else if (Komunalne.util.isFunction(type)) res = obj instanceof type;
-  else throw "Invalid comparison of " + (typeof obj) + " against " + (typeof type);
+  else if (Komunalne.util.isFunction(type)) {
+    if (obj instanceof Object) res = obj.constructor === type;
+    else res = obj instanceof type;
+  } else throw "Invalid comparison of " + (typeof obj) + " against " + (typeof type);
   return res;
 };
 
@@ -275,13 +278,14 @@ Komunalne.util.clone = function(obj,cfg) {
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
-    // If object is not an array and has a constructor with arguments, 
-    // as its impossible to recreate them, return the object itself.
-    else if (!Komunalne.util.isArray(obj) && !Komunalne.util.isInstanceOf(obj,Object) 
-             && obj.constructor.length > 0) c = obj; 
     else {
       seen.push(obj);
-      clones.push((c = (first && "into" in cfg) ? cfg.into : new obj.constructor()));
+      // If object is not an array and has a constructor with arguments, 
+      // as its impossible to recreate them, return the object itself.
+      c = (first && "into" in cfg) ? cfg.into :
+          (!Komunalne.util.isArray(obj) && !Komunalne.util.isInstanceOf(obj,Object) && obj.constructor.length > 0)
+          ? obj : new obj.constructor();
+      clones.push(c);
       first = false;
       replica = function(val) { return clone(val,cfg); };
       refer = function(val) { return val; };
