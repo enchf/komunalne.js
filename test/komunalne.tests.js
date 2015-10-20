@@ -44,7 +44,8 @@ var testDataTypes = {
   "Date": { "type": Date, "apply": ["date","invalid-date"] },
   "function": { "type": "function", "apply": ["function"] },
   "custom": { "type": T, "apply": ["t"] },
-  "custom-2": { "type": U, "apply": ["u"] }
+  "custom-2": { "type": U, "apply": ["u"] },
+  "Object": { "type": Object, "apply": ["empty-object","object"] }
 };
 
 /***************************
@@ -259,13 +260,14 @@ QUnit.test("Date type test in strict mode", function(assert) {
 
 QUnit.test("Is instance of type test", function(assert) {
   var suite = new Komunalne.test.Suite();
-  var res;
+  var res,t;
   for (var typ in testDataTypes) {
     for (var obj in testData) {
       res = Komunalne.util.arrayContains(obj,testDataTypes[typ].apply);
+      t = testDataTypes[typ].type;
       suite.add({ "expected": res, "args": [testData[obj],testDataTypes[typ].type],
                   "msg": "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type " 
-                + testDataTypes[typ].type.toString() });
+                + (typeof t == "string" ? t : (t.name || "Custom Type")) });
     }
   }
   suite.execute(assert.buildFor("strictEqual"),Komunalne.util.isInstanceOf);
