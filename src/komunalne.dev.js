@@ -267,7 +267,7 @@ Komunalne.util.clone = function(obj,cfg) {
   var first = true;
   cfg = (cfg || {});
   if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
-    throw "Target object is null or not an object";
+    throw Komunalne.util.clone.invalidTarget;
   }
   var clone = function(obj,cfg) {
     var replica,refer,wrapper;
@@ -291,6 +291,7 @@ Komunalne.util.clone = function(obj,cfg) {
   };
   return clone(obj,cfg);
 };
+Komunalne.util.clone.invalidTarget = "Target object is null or not an object";
 
 /**
  * Return the keys of an object/array.
