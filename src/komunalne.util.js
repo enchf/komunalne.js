@@ -196,6 +196,10 @@ Komunalne.util.clone = function(obj,cfg) {
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
+    // If object is not an array and has a constructor with arguments, 
+    // as its impossible to recreate them, return the object itself.
+    else if (!Komunalne.util.isArray(obj) && !Komunalne.util.isInstanceOf(obj,Object) 
+             && obj.constructor.length > 0) c = obj; 
     else {
       seen.push(obj);
       clones.push((c = (first && "into" in cfg) ? cfg.into : new obj.constructor()));
