@@ -6,7 +6,6 @@ I did the compilation with the purpose of have a consolidation available of usef
 ## Dependencies
 
 * jQuery - DOM Manipulation.
-* jQuery Validator - Functions extracted from the plugin.
 * QUnit - Unit testing and testing commons utils.
 
 ## Folders
