@@ -682,8 +682,8 @@ QUnit.test("Clone into an existing object", function(assert) {
   custom.D = function(name) {
     var obj = (Komunalne.util.isInstanceOf(this,custom.D)) ? this : new custom.D();
     obj.name = name;
-    obj.default = {};
-    Komunalne.util.clone(obj,{ "into": obj.default });
+    obj.defaults = {};
+    Komunalne.util.clone(obj,{ "into": obj.defaults });
     return obj;
   };
   var w;
@@ -730,12 +730,12 @@ QUnit.test("Clone into an existing object", function(assert) {
   w = Komunalne.util.clone(custom.D("test"),{"deep": true});
   assert.ok(Komunalne.util.isInstanceOf(w,custom.D),"Type of inner self replication object");
   assert.strictEqual("test",w.name,"Properties replication");
-  assert.ok(w.default === w.default.default,"Inner self clone is the same instance as parent");
+  assert.ok(w.defaults === w.defaults.defaults,"Inner self clone is the same instance as parent");
   
   w = Komunalne.util.clone(new custom.D("test"),{"into":{}});
   assert.notOk(Komunalne.util.isInstanceOf(w,custom.D),"If target object is provided clone cannot be of the same type");
   assert.strictEqual("test",w.name,"Properties replication into target object");
-  assert.notOk(w === w.default,"Provided target object is not the same as newly internally created target object");
+  assert.notOk(w === w.defaults,"Provided target object is not the same as newly internally created target object");
 });
 
 QUnit.test("Number of keys function", function(assert) {
