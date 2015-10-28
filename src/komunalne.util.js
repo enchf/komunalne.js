@@ -182,6 +182,9 @@ Komunalne.util.forEach = function(obj,fn,scope) {
  *         For sub-objects, always a newly object is created using constructor.
  * - safe: True to clone/copy only the non-present properties in the target object.
  *         Applicable only if into is set.
+ * - skip: Applicable in any configuration. Can be an array or a string.
+ *         Avoids cloning the properties specified in this parameter.
+ *         Accepts subproperties, only applicable in deep cloning.
  * The function takes care of circular references in deep cloning.
  * If object is not an object or a null/undefined reference, it is returned itself.
  */
@@ -189,15 +192,18 @@ Komunalne.util.clone = function(obj,cfg) {
   var seen = [];
   var clones = [];
   var first = true;
+  var replica,refer;
   cfg = (cfg || {});
   if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
     throw Komunalne.util.clone.invalidTarget;
   }
+  replica = function(val) { return clone(val,cfg); };
+  refer = function(val) { return val; };
   var clone = function(obj,cfg) {
-    var replica,refer,wrapper;
+    var wrapper;
     var c,i,fn;
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
-    else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj);
+    else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj.getTime());
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
     else {
       seen.push(obj);
@@ -210,8 +216,6 @@ Komunalne.util.clone = function(obj,cfg) {
       }
       clones.push(c);
       first = false;
-      replica = function(val) { return clone(val,cfg); };
-      refer = function(val) { return val; };
       fn = cfg.deep === true ? replica : refer;
       wrapper = function(val,key) {
         c[key] = (cfg.safe !== true || c[key] === undefined) ? fn(val) : c[key];
