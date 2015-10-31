@@ -184,7 +184,8 @@ Komunalne.util.forEach = function(obj,fn,scope) {
  *         Applicable only if into is set.
  * - skip: Applicable in any configuration. Can be an array or a string.
  *         Avoids cloning the properties specified in this parameter.
- *         Accepts subproperties, only applicable in deep cloning.
+ *         Accepts subproperties with dot notation, only applicable in deep cloning.
+ *         Any misconfiguration will make skip to be ignored.
  * The function takes care of circular references in deep cloning.
  * If object is not an object or a null/undefined reference, it is returned itself.
  */
@@ -193,15 +194,32 @@ Komunalne.util.clone = function(obj,cfg) {
   var clones = [];
   var first = true;
   var replica,refer;
+  var skip,innerSkip;
+  
   cfg = (cfg || {});
   if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
     throw Komunalne.util.clone.invalidTarget;
   }
-  replica = function(val) { return clone(val,cfg); };
+  replica = function(val,skip) { return clone(val,cfg,skip); };
   refer = function(val) { return val; };
-  var clone = function(obj,cfg) {
+  skip = ("skip" in cfg) ? 
+          ((Komunalne.util.isArray(cfg.skip) && Komunalne.util.isArrayOf(cfg.skip,"string")) ? cfg.skip 
+          : (Komunalne.util.isInstanceOf(cfg.skip,"string")) ? [cfg.skip] : [])
+        : [];
+  innerSkip = function(skip) {
+    var index;
+    var clone = Komunalne.util.clone(skip);
+    for (var i in clone) {
+      clone[i] = ((index = clone[i].indexOf(".")) >= 0) ? clone[i].substr(index+1) : "";
+    }
+    return clone;
+  };
+  
+  var clone = function(obj,cfg,skip) {
     var wrapper;
     var c,i,fn;
+    var subskip;
+    
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj.getTime());
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
@@ -216,15 +234,22 @@ Komunalne.util.clone = function(obj,cfg) {
       }
       clones.push(c);
       first = false;
-      fn = cfg.deep === true ? replica : refer;
-      wrapper = function(val,key) {
-        c[key] = (cfg.safe !== true || c[key] === undefined) ? fn(val) : c[key];
-      };
-      Komunalne.util.forEach(obj,wrapper);
+      if (cfg.deep === true) {
+        fn = replica;
+        subskip = innerSkip(skip);
+      } else {
+        fn = refer;
+        subskip = [];
+      }
+      for (var x in obj) {
+        if (Komunalne.util.arrayContains(x,skip)) continue;
+        c[x] = (cfg.safe !== true || c[x] === undefined) ? fn(obj[x],subskip) : c[x];
+      }
     }
+    
     return c;
   };
-  return clone(obj,cfg);
+  return clone(obj,cfg,skip);
 };
 Komunalne.util.clone.invalidTarget = "Target object is null or not an object";
 

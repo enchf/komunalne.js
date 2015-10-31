@@ -738,6 +738,58 @@ QUnit.test("Clone into an existing object", function(assert) {
   assert.notOk(w === w.defaults,"Provided target object is not the same as newly internally created target object");
 });
 
+QUnit.test("Clone skipping properties", function(assert) {
+  var a = { "x": 1, "y": 2, "z": 3 };
+  var b = { "m": 1, "n": { "g": "sub", "h": -1 }, "o": false };
+  var c = { "a": 10, "b": 20 };
+  var w;
+  
+  w = Komunalne.util.clone(a,{"skip": "x"});
+  assert.notOk("x" in w,"Cloning skipping single property: Skipped x property not cloned");
+  assert.equal(w.y,2,"Cloning skipping single property: Other properties well cloned: y");
+  assert.equal(w.z,3,"Cloning skipping single property: Other properties well cloned: z");
+  assert.deepEqual(Komunalne.util.keys(w),["y","z"],"Cloning skipping single property: Only two keys present in clone");
+  
+  w = Komunalne.util.clone(a,{"skip": ["x","y"]});
+  assert.notOk("x" in w,"Object a, skipping x and y: x test");
+  assert.notOk("y" in w,"Object a, skipping x and y: y test");
+  assert.equal(w.z,3,"Object a, skipping x and y: z present test");
+  assert.deepEqual(Komunalne.util.keys(w),["z"],"Only one key present in a clone when skipping x and y");
+  
+  w = Komunalne.util.clone(c,{"skip": ["x","y"]});
+  assert.equal(w.a,10,"Cloning c skipping unexisting properties results in the same object: a test");
+  assert.equal(w.b,20,"Cloning c skipping unexisting properties results in the same object: b test");
+  assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Clone has only original keys skipping unexisting properties");
+  
+  w = Komunalne.util.clone(a,{"into": c, "skip": ["z"]});
+  assert.equal(w,c,"No new object created when cloning into");
+  assert.deepEqual(Komunalne.util.keys(w),["a","b","x","y"],"Skipping z property when cloning a into c");
+  assert.equal(w.x,1,"Checking cloned property x");
+  assert.equal(w.y,2,"Checking cloned property y");
+  assert.equal(w.a,10,"Checking cloned property a");
+  assert.equal(w.b,20,"Checking cloned property b");
+  
+  w = Komunalne.util.clone(b,{"skip":["n","o"],"deep":true});
+  assert.deepEqual(Komunalne.util.keys(w),["m"],"Cloning deep an object but skipping sub object properties");
+  assert.equal(w.m,1,"Deep clone with skip, cloning only property m");
+  
+  w = Komunalne.util.clone(b,{"skip":"n.g"});
+  assert.deepEqual(Komunalne.util.keys(w),["m","n","o"],"Skipping sub property but without deep flag");
+  assert.deepEqual(Komunalne.util.keys(w.n),["g","h"],"Skipped subproperty without deep flag is still present");
+  assert.equal(w.m,1,"Skipping sub property but without deep flag: m test");
+  assert.deepEqual(w.n,{"g":"sub","h":-1},"Skipping sub property but without deep flag: n test");
+  assert.equal(w.n.g,"sub","Skipping sub property but without deep flag: n.g test");
+  assert.equal(w.n.h,-1,"Skipping sub property but without deep flag: n.h test");
+  assert.strictEqual(w.o,false,"Skipping sub property but without deep flag: o test");
+  
+  w = Komunalne.util.clone(b,{"skip":["n.h","o","n.h.z"],"deep":true});
+  assert.deepEqual(Komunalne.util.keys(w),["m","n"],"Skipping subproperty with deep flag");
+  assert.deepEqual(Komunalne.util.keys(w.n),["g"],"Skipped subproperty with deep flag: n.g only present in clone");
+  assert.equal(w.m,1,"Skipping subproperty with deep flag: m test");
+  assert.deepEqual(w.n,{"g":"sub"},"Skipping subproperty with deep flag: n test");
+  assert.equal(w.n.g,"sub","Skipping subproperty with deep flag: n.g test");
+});
+
 QUnit.test("Number of keys function", function(assert) {
   var suite = new Komunalne.test.Suite();
   var arr = [1,2,3]; arr.foo = 4; arr["6"] = 5; arr.x = false;
