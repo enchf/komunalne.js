@@ -7,7 +7,7 @@
  * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
  */
 Komunalne.dom.elementText = function(id,text) {
-  var el = document.getElementById(id);
+  var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
   if (el != null) {
     if (text != null) el.childNodes[0].nodeValue = text;
     text = el.childNodes[0].nodeValue;

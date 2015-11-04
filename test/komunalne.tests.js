@@ -805,6 +805,11 @@ QUnit.test("Text of DOM element", function(assert) {
   Komunalne.dom.elementText("el-test","parent");
   assert.equal(Komunalne.dom.elementText("el-test"),"parent","Text updated in parent");
   assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using K function");
+  assert.equal(Komunalne.$.elementText("#el-test"),"parent","Using jQuery based function");
+  Komunalne.$.elementText("#el-test","last");
+  assert.equal(Komunalne.dom.elementText("el-test"),"last","Text updated in parent using jQuery function");
+  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using $ function");
+  assert.equal(Komunalne.$.elementText("#el-test"),"last","Using jQuery based function after changing text");
   el.remove();
 });
 
