@@ -1,0 +1,3 @@
+/**
+ * Komunalne.js jQuery utilities.
+ */

@@ -1,5 +1,5 @@
 #!/bin/sh
-KMODULES="helper util format test"
+KMODULES="helper util \$ dom format test"
 cat komunalne.init.js > komunalne.dev.js
 
 for M in $KMODULES

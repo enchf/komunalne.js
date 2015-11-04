@@ -58,6 +58,8 @@ QUnit.test("Komunalne.js Definition", function(assert) {
   assert.ok(Komunalne.test,"Komunalne.js unit testing helpers");
   assert.ok(Komunalne.helper,"Komunalne.js helpers container");
   assert.ok(Komunalne.test,"Komunalne.js test container");
+  assert.ok(Komunalne.$,"Komunalne.js jQuery methods container");
+  assert.ok(Komunalne.dom,"Komunalne.js DOM methods container");
 });
 
 QUnit.test("Unit test executor", function(assert) {
@@ -788,6 +790,22 @@ QUnit.test("Clone skipping properties", function(assert) {
   assert.equal(w.m,1,"Skipping subproperty with deep flag: m test");
   assert.deepEqual(w.n,{"g":"sub"},"Skipping subproperty with deep flag: n test");
   assert.equal(w.n.g,"sub","Skipping subproperty with deep flag: n.g test");
+});
+
+QUnit.test("Text of DOM element", function(assert) {
+  var container = $("#test-div");
+  var el = $("<div></div>").text("test").attr("id","el-test");
+  var child1 = $("<span></span>").text("1").attr("id","span-child");
+  var child2 = $("<span></span>").text("2");
+  child1.appendTo(el);
+  child2.appendTo(el);
+  el.appendTo(container);
+  assert.equal(Komunalne.dom.elementText("el-test"),"test","Only parent element text is retrieved, not descendants");
+  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text is set on child element");
+  Komunalne.dom.elementText("el-test","parent");
+  assert.equal(Komunalne.dom.elementText("el-test"),"parent","Text updated in parent");
+  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using K function");
+  el.remove();
 });
 
 QUnit.test("Number of keys function", function(assert) {
