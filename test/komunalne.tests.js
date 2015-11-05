@@ -796,20 +796,23 @@ QUnit.test("Text of DOM element", function(assert) {
   var container = $("#test-div");
   var el = $("<div></div>").text("test").attr("id","el-test");
   var child1 = $("<span></span>").text("1").attr("id","span-child");
-  var child2 = $("<span></span>").text("2");
+  var child2 = $("<span></span>").attr("id","empty-span");
   child1.appendTo(el);
   child2.appendTo(el);
   el.appendTo(container);
   assert.equal(Komunalne.dom.elementText("el-test"),"test","Only parent element text is retrieved, not descendants");
   assert.equal(Komunalne.dom.elementText("span-child"),"1","Text is set on child element");
+  assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text on second child");
   Komunalne.dom.elementText("el-test","parent");
   assert.equal(Komunalne.dom.elementText("el-test"),"parent","Text updated in parent");
-  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using K function");
+  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using dom function");
+  assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text remains on second child after dom function");
   assert.equal(Komunalne.$.elementText("#el-test"),"parent","Using jQuery based function");
   Komunalne.$.elementText("#el-test","last");
   assert.equal(Komunalne.dom.elementText("el-test"),"last","Text updated in parent using jQuery function");
   assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using $ function");
   assert.equal(Komunalne.$.elementText("#el-test"),"last","Using jQuery based function after changing text");
+  assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text remains on second child after $ function");
   el.remove();
 });
 
