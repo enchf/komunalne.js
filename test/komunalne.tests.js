@@ -817,6 +817,10 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.$.elementText(el),"other-text","Text updated in parent using jQuery function");
   assert.equal(Komunalne.$.elementText(child1),"other","Text child remains the same after using $ function");
   assert.equal(Komunalne.$.elementText(child2),"","Empty text remains on second child after $ function");
+  Komunalne.$.elementText(child2,"child-not-empty");
+  assert.equal(Komunalne.$.elementText(el),"other-text","Text remains in parent after update to child");
+  assert.equal(Komunalne.$.elementText(child1),"other","Text child remains the same after using $ function");
+  assert.equal(Komunalne.$.elementText(child2),"child-not-empty","Text updated on second child after $ function");
   
   el = $("<div></div>").text("test").attr("id","el-test");
   child1 = $("<span></span>").text("1").attr("id","span-child");
@@ -848,6 +852,27 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.$.elementText("#el-test"),"other-text","Using jQuery based function after changing text");
   assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text remains on second child after $ function");
   el.remove();
+  
+  el = document.createElement("div");
+  el.id = "el-test";
+  child1 = document.createElement("span");
+  child1.id = "span-child";
+  child2 = document.createElement("span");
+  child2.id = "empty-span";
+  el.appendChild(child1);
+  el.appendChild(child2);
+  
+  assert.equal(Komunalne.dom.elementText(el),"","All texts are initialized empty: parent div");
+  assert.equal(Komunalne.dom.elementText(child1),"","All texts are initialized empty: first span");
+  assert.equal(Komunalne.dom.elementText(child2),"","All texts are initialized empty: second span");
+  Komunalne.dom.elementText(child1,"first span");
+  assert.equal(Komunalne.dom.elementText(el),"","Parent remains empty after update to first span");
+  assert.equal(Komunalne.dom.elementText(child1),"first span","Text update in first span");
+  assert.equal(Komunalne.dom.elementText(child2),"","Second span remains empty after update to first span");
+  Komunalne.dom.elementText(el,"parent");
+  assert.equal(Komunalne.dom.elementText(el),"parent","Parent text update");
+  assert.equal(Komunalne.dom.elementText(child1),"first span","Text in first span remains the same after parent update");
+  assert.equal(Komunalne.dom.elementText(child2),"","Second span remains empty after update to parent");
 });
 
 QUnit.test("Number of keys function", function(assert) {
