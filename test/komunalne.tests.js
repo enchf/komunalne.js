@@ -794,9 +794,33 @@ QUnit.test("Clone skipping properties", function(assert) {
 
 QUnit.test("Text of DOM element", function(assert) {
   var container = $("#test-div");
-  var el = $("<div></div>").text("test").attr("id","el-test");
-  var child1 = $("<span></span>").text("1").attr("id","span-child");
-  var child2 = $("<span></span>").attr("id","empty-span");
+  var el,child1,child2;
+  
+  el = $("<div></div>").text("test").attr("id","el-test");
+  child1 = $("<span></span>").text("1").attr("id","span-child");
+  child2 = $("<span></span>").attr("id","empty-span");
+  child1.appendTo(el);
+  child2.appendTo(el);
+  
+  assert.equal(Komunalne.$.elementText(el),"test","Only parent element text is retrieved, not descendants");
+  assert.equal(Komunalne.$.elementText(child1),"1","Text is set on child element");
+  assert.equal(Komunalne.$.elementText(child2),"","Empty text on second child");
+  Komunalne.$.elementText(el,"parent");
+  assert.equal(Komunalne.$.elementText(el),"parent","Text updated in parent");
+  assert.equal(Komunalne.$.elementText(child1),"1","Text child remains after change in parent with dom method");
+  assert.equal(Komunalne.$.elementText(child2),"","Empty text remains on second child after dom function");
+  Komunalne.$.elementText(child1,"other");
+  assert.equal(Komunalne.$.elementText(el),"parent","Text updated in child keeps text of parent");
+  assert.equal(Komunalne.$.elementText(child1),"other","Text child is changed using $ function");
+  assert.equal(Komunalne.$.elementText(child2),"","Empty text remains on second child after $ function");
+  Komunalne.$.elementText(el,"other-text");
+  assert.equal(Komunalne.$.elementText(el),"other-text","Text updated in parent using jQuery function");
+  assert.equal(Komunalne.$.elementText(child1),"other","Text child remains the same after using $ function");
+  assert.equal(Komunalne.$.elementText(child2),"","Empty text remains on second child after $ function");
+  
+  el = $("<div></div>").text("test").attr("id","el-test");
+  child1 = $("<span></span>").text("1").attr("id","span-child");
+  child2 = $("<span></span>").attr("id","empty-span");
   child1.appendTo(el);
   child2.appendTo(el);
   el.appendTo(container);
@@ -805,7 +829,7 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text on second child");
   Komunalne.dom.elementText("el-test","parent");
   assert.equal(Komunalne.dom.elementText("el-test"),"parent","Text updated in parent");
-  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after altering parent using dom function");
+  assert.equal(Komunalne.dom.elementText("span-child"),"1","Text child remains after change in parent with dom method");
   assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text remains on second child after dom function");
   assert.equal(Komunalne.$.elementText("#el-test"),"parent","Using jQuery based function");
   Komunalne.$.elementText("#el-test","last");

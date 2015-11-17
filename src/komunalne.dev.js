@@ -362,12 +362,35 @@ Komunalne.$.elementText = function(selector,text) {
 /**
  * Alternative to $.text(). Returns/replace the text of the element matched with the specified id.
  * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
+ * In case of replace (text != null), if the element has multiple text nodes, text will be replaced in the first found.
  */
 Komunalne.dom.elementText = function(id,text) {
+  var i,n,buf,aux;
   var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
   if (el != null) {
-    if (text != null) el.childNodes[0].nodeValue = text;
-    text = el.childNodes.length === 0 ? "" : el.childNodes[0].nodeValue;
+    if (!el.hasChildNodes()) {
+      if (text != null) el.createTextNode(text);
+      else text = "";
+    } else {
+      if (text != null) {
+        i = new Komunalne.helper.Iterator(el.childNodes);
+        while (i.hasNext()) {
+          aux = i.next();
+          if (aux.nodeType == 3) break;
+          else aux = null;
+        }
+        if (aux != null) aux.nodeValue = text;
+        else el.createTextNode(text);
+      } else {
+        buf = [];
+        i = new Komunalne.helper.Iterator(el.childNodes);
+        while (i.hasNext()) {
+          aux = i.next();
+          if (aux.nodeType == 3) buf.push(aux.nodeValue);
+        }
+        text = buf.join();
+      }
+    }
   } else text = null;
   return text;
 };
