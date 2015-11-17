@@ -12,7 +12,7 @@ Komunalne.dom.elementText = function(id,text) {
   var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
   if (el != null) {
     if (!el.hasChildNodes()) {
-      if (text != null) el.createTextNode(text);
+      if (text != null) el.appendChild(document.createTextNode(text));
       else text = "";
     } else {
       if (text != null) {
@@ -23,7 +23,7 @@ Komunalne.dom.elementText = function(id,text) {
           else aux = null;
         }
         if (aux != null) aux.nodeValue = text;
-        else el.createTextNode(text);
+        else el.appendChild(document.createTextNode(text));
       } else {
         buf = [];
         i = new Komunalne.helper.Iterator(el.childNodes);
