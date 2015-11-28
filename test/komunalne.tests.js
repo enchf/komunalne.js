@@ -875,6 +875,20 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.dom.elementText(child2),"","Second span remains empty after update to parent");
 });
 
+QUnit.test("Full height of elements", function(assert) {
+  var div;
+  var height;
+  height = $(window).height();
+  div = $("<div></div>").addClass("fakecss").appendTo("#test-div");
+  assert.notEqual(height,div.height(),"Initially unequal in height");
+  assert.ok($(".fakecss").length > 0,"Div is localizable");
+  Komunalne.$.fullHeight(".fakecss");
+  $(window).resize();
+  assert.equal(div.height(),height,"Item resized accordingly to: " + height);
+  assert.equal(div.css("min-height"),height+"px","Min height established");
+  $("#test-div").empty();
+});
+
 QUnit.test("Number of keys function", function(assert) {
   var suite = new Komunalne.test.Suite();
   var arr = [1,2,3]; arr.foo = 4; arr["6"] = 5; arr.x = false;
