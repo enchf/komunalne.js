@@ -103,7 +103,7 @@ Komunalne.util.path = function(obj,path) {
   var paths = path.split(".");
   var el = obj;
   for (var p in paths) {
-    if (typeof el === "object" && el[paths[p]] !== undefined) el = el[paths[p]]; 
+    if (Komunalne.util.isInstanceOf(el,Object) && el[paths[p]] !== undefined) el = el[paths[p]]; 
     else { el = null; break; }
   }
   return el;

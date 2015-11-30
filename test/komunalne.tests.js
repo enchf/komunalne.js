@@ -224,6 +224,7 @@ QUnit.test("Path lookup function", function(assert) {
   suite.add({ "expected": false, "args": [obj,"d.f.g"], "msg": "Test two depth ['d.f.g']" });
   suite.add({ "expected": null, "args": [obj,"d.i.f"], "msg": "Test unreachable path === null" });
   suite.add({ "expected": null, "args": [obj,"a.b"], "msg": "Test try to go deep into a non object" });
+  suite.add({ "expected": null, "args": [null,"a.b"], "msg": "Test try to go deep into null" });
   suite.execute(assert.buildFor("strictEqual"),Komunalne.util.path); 
 });
 
