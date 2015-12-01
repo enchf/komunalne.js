@@ -952,3 +952,17 @@ QUnit.test("General testing to format functions", function(assert) {
   suite.add({ "args": ["sTrInG"], "expected": "String", "msg": "Capitalization of multiple uppercase string letters" });
   suite.execute(assert.buildFor("equal"),Komunalne.format.capitalize);
 });
+
+QUnit.test("Check animation is set on an element", function(assert) {
+  var target = $("#test-div");
+  var animation = "bounceOutLeft";
+  var animated = "animated";
+  var wait = assert.async();
+  var promise = Komunalne.anim.animate(animation,target).then(function() {
+    assert.notOk(target.hasClass(animated),"Animated class is removed");
+    assert.notOk(target.hasClass(animation),"Animation class is removed");
+    wait();
+  });
+  assert.ok(target.hasClass(animated),"Animated class is set");
+  assert.ok(target.hasClass(animation),"Animation class is set");
+});

@@ -9,6 +9,7 @@ Komunalne.format = {};
 Komunalne.test = {};
 Komunalne.$ = {};
 Komunalne.dom = {};
+Komunalne.anim = {};
 
 /* Shortcut if not defined already */
 if (window.K === undefined) window.K = Komunalne;
@@ -440,6 +441,25 @@ Komunalne.format.currency = function(num,nd,ds,ms){
  * @param str String to be capitalized.
  */
 Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
+
+/**
+ * CSS Animation utils.
+ */
+
+/**
+ * Using Animate.css. Sets an animation to a target and quits after animation completes.
+ * @see http://daneden.github.io/animate.css/
+ */
+Komunalne.anim.animate = function(effect,target) {
+  var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+  return new Promise(function(resolve,reject) {
+    effect = Komunalne.util.append("animated",effect);
+    $(target).addClass(effect).one(ends,function() {
+      $(this).removeClass(effect);
+      resolve(this);
+    });
+  });
+};
 
 /**
  * Test case object build with a config object with the following properties (all optional):
