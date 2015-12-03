@@ -31,8 +31,8 @@ Komunalne.anim.animation = function(effect,target,before,after) {
   target = $(target);
   resolver = function(res,rej) {
     var wrapAfter = function() {
-      target.removeClass(effect);
       after(target);
+      target.removeClass(effect);
       res(target);
     };
     target.addClass(effect).one(starts,before).one(ends,wrapAfter);
