@@ -957,12 +957,32 @@ QUnit.test("Check animation is set on an element", function(assert) {
   var target = $("#test-div");
   var animation = "bounceOutLeft";
   var animated = "animated";
-  var wait = assert.async();
-  var promise = Komunalne.anim.animate(animation,target).then(function() {
-    assert.notOk(target.hasClass(animated),"Animated class is removed");
-    assert.notOk(target.hasClass(animation),"Animation class is removed");
-    wait();
+  var wait1 = assert.async();
+  var wait2 = assert.async();
+  var before,after;
+  
+  Komunalne.anim.animate(animation,target).then(function() {
+    assert.notOk(target.hasClass(animated),"Animated class is removed, first method");
+    assert.notOk(target.hasClass(animation),"Animation class is removed, first method");
+    wait1();
   });
-  assert.ok(target.hasClass(animated),"Animated class is set");
-  assert.ok(target.hasClass(animation),"Animation class is set");
+  assert.ok(target.hasClass(animated),"Animated class is set, first method");
+  assert.ok(target.hasClass(animation),"Animation class is set, first method");
+  
+  before = function() {
+    assert.ok(target.hasClass(animated),"Animated class is set before, second method");
+    assert.ok(target.hasClass(animation),"Animation class is set before, second method");
+  };
+  after = function() { 
+    assert.notOk(target.hasClass(animated),"Animated class is removed after, second method");
+    assert.notOk(target.hasClass(animation),"Animation class is removed after, second method");
+  };
+  
+  Komunalne.anim.animation(animation,target,before,after).then(function() {
+    assert.notOk(target.hasClass(animated),"Animated class is removed, second method");
+    assert.notOk(target.hasClass(animation),"Animation class is removed, second method");
+    wait2();
+  });
+  assert.ok(target.hasClass(animated),"Animated class is set, second method");
+  assert.ok(target.hasClass(animation),"Animation class is set, second method");
 });
