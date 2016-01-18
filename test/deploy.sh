@@ -1,5 +1,4 @@
 #!/bin/sh
-v="all"
 l="dist"
 m=""
 path="$(cat test.target)"
