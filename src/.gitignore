@@ -1,2 +1,2 @@
 # Ignore build.target
-build.target
+**/build.target

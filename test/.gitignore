@@ -1,2 +1,2 @@
 # Ignore Webserver path file.
-test.target
+**/test.target
