@@ -13,7 +13,7 @@ fi
 if [ $# -ge 2 -a "$2" = "dev" ]
   then l="src"
 fi
-if [ $# -eq 3 -a "$3" = "min" ]
+if [ $# -eq 3 -a "$3" = "min" -a "$2" = "dist" ]
   then m=".min"
 fi
 
@@ -24,7 +24,8 @@ do
   cd $i
   cp index.html $p
   cp komunalne.tests.js $p
-  cd ../../$l/$i
-  if [ $l = "src" ]; then sh build.sh; fi
+  cd ../../$l
+  if [ $l = "src" ]; then sh build.sh $i; fi
+  cd $i
   cp komunalne.all$m.js $p/komunalne.js
 done

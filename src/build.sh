@@ -1,9 +1,11 @@
 #!/bin/sh
-KMODULES="helper util \$ dom format anim test"
-cat komunalne.init.js > komunalne.dev.js
+cd $1
+mods="$(find . -name "*.js" ! -name "*init*" ! -name "*all*")"
+cat komunalne.init.js > komunalne.all.js
 
-for M in $KMODULES
+for m in $mods
 do
-  echo "" >> komunalne.dev.js
-  cat komunalne.$M.js >> komunalne.dev.js
+  m="${m#*/}"
+  echo "" >> komunalne.all.js
+  cat $m >> komunalne.all.js
 done
