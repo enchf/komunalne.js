@@ -12,7 +12,7 @@ fi
 if [ $# -ge 2 -a "$2" = "dev" ]
   then l="src"
 fi
-if [ $# -eq 3 -a "$3" = "min" -a "$2" = "dist" ]
+if [ $# -eq 3 -a "$3" = "min" -a "$l" = "dist" ]
   then m=".min"
 fi
 
