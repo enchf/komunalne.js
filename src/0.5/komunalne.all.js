@@ -95,7 +95,7 @@ Komunalne.anim.animation = function(effect,target,before,after) {
  * In case of replace (text != null), if the element has multiple text nodes, text will be replaced in the first found.
  */
 Komunalne.dom.elementText = function(id,text) {
-  var i,n,buf,aux;
+  var i,buf,aux = null;
   var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
   if (el != null) {
     if (!el.hasChildNodes()) {
@@ -513,7 +513,6 @@ Komunalne.util.clone = function(obj,cfg) {
   };
   
   var clone = function(obj,cfg,skip) {
-    var wrapper;
     var c,i,fn;
     var subskip;
     

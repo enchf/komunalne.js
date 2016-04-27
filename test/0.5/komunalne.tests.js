@@ -89,7 +89,6 @@ QUnit.test("Unit test executor", function(assert) {
 QUnit.test("Iterator implementation", function(assert) {
   var a,b,c,d,e,f,g,h,v,w;
   var nextError = Komunalne.helper.Iterator.nextError;
-  var keyError = Komunalne.helper.Iterator.keyError;
   
   a = new Komunalne.helper.Iterator(testData["empty-object"]);
   b = new Komunalne.helper.Iterator(testData.object);
@@ -387,7 +386,7 @@ QUnit.test("Array concatenation", function(assert) {
 QUnit.test("For each function for objects, arguments and arrays", function(assert) {
   var str = "";
   var keys = "";
-  var current;
+  var current = null;
   var test = function(x,i,obj) { 
     str += x; 
     keys += i;
@@ -446,7 +445,8 @@ QUnit.test("Cloning objects", function(assert) {
   var e = new c();
   var f = { a: 1, b: false, c: { x: 9, y: [0] }, d: function(x) { return x; } };
   var g = new Date();
-  var i = [{a:1},2,{b:2},[1,2]];
+  var arr = [1,2];
+  var i = [{a:1},2,{b:2},arr];
   var j = {a:0,b:1};
   var k = {x:j}; k.x.c = j;
   var w,suite;
@@ -720,7 +720,7 @@ QUnit.test("Clone into an existing object", function(assert) {
   
   assert.throws(
     function() { 
-      Komunalne.util.clone(a,{"into":null, "deep": true}) 
+      Komunalne.util.clone(a,{"into":null, "deep": true});
     },
     Komunalne.util.clone.invalidTarget,
     "Cloning into non object results in exception"

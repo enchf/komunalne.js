@@ -216,7 +216,6 @@ Komunalne.util.clone = function(obj,cfg) {
   };
   
   var clone = function(obj,cfg,skip) {
-    var wrapper;
     var c,i,fn;
     var subskip;
     
