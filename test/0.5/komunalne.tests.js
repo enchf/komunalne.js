@@ -39,7 +39,7 @@ var testDataTypes = {
   "Array": { "type": Array, "apply": ["empty-array","array"] },
   "undefined": { "type": "undefined", "apply": ["undefined"] },
   "string": { "type": "string", "apply": ["string"] },
-  "number": { "type": "number", "apply": ["number","negative-number","zero","floating-point-number"] },
+  "number": { "type": "number", "apply": ["number","negative-number","zero","floating-point-number"] },
   "boolean": { "type": "boolean", "apply": ["true","false"] },
   "Date": { "type": Date, "apply": ["date","invalid-date"] },
   "function": { "type": "function", "apply": ["function"] },

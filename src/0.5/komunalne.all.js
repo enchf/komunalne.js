@@ -101,7 +101,7 @@ Komunalne.dom.elementText = function(id,text) {
     if (!el.hasChildNodes()) {
       if (text != null) el.appendChild(document.createTextNode(text));
       else text = "";
-    } else {
+    } else {
       if (text != null) {
         i = new Komunalne.helper.Iterator(el.childNodes);
         while (i.hasNext()) {
