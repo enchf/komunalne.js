@@ -15,6 +15,147 @@ Komunalne.anim = {};
 if (window.K === undefined) window.K = Komunalne;
 
 /**
+ * Komunalne.js jQuery utilities.
+ */
+
+/**
+ * Alternative to $.text() for jQuery objects. Returns/replace the text of the element matched with the specified id.
+ * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
+ */
+Komunalne.$.elementText = function(selector,text) {
+  return Komunalne.dom.elementText($(selector).get(0),text);
+};
+
+/**
+ * Call this method to set the items that match the specified selectors with full screen height.
+ * Method should be called within an $(function() { ... }) "onReady" block or when the screen is ready.
+ */
+Komunalne.$.fullHeight = function(selectors) {
+  var adjustHeight;
+  adjustHeight = function(selector) { $(selector).css("min-height",$(window).height()); };
+  selectors = Komunalne.util.isArray(selectors) ? selectors : [selectors];
+  selectors.forEach(function(selector) {
+    var bind = adjustHeight.bind(null,selector);
+    $(window).resize(bind);
+    $(window).load(bind);
+  });
+};
+
+/**
+ * CSS Animation utils.
+ */
+
+/**
+ * Using Animate.css. Sets an animation to a target and quits after animation completes.
+ * @see http://daneden.github.io/animate.css/
+ */
+Komunalne.anim.animate = function(effect,target) {
+  var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+  return new Promise(function(resolve,reject) {
+    effect = Komunalne.util.append("animated",effect);
+    $(target).addClass(effect).one(ends,function() {
+      $(this).removeClass(effect);
+      resolve(this);
+    });
+  });
+};
+
+/**
+ * Using Animate.css. Sets an animation to a target and quits after animation completes.
+ * Includes handlers to execute before and after animation.
+ * @see http://daneden.github.io/animate.css/
+ */
+Komunalne.anim.animation = function(effect,target,before,after) {
+  var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+  var starts = 'webkitAnimationStart mozAnimationStart MSAnimationStart oanimationstart animationstart';
+  var resolver;
+  
+  effect = Komunalne.util.append("animated",effect);
+  target = $(target);
+  resolver = function(res,rej) {
+    var wrapAfter = function() {
+      target.removeClass(effect);
+      after(target);
+      res(target);
+    };
+    target.addClass(effect).one(starts,before).one(ends,wrapAfter);
+  };
+  
+  return new Promise(resolver);
+};
+
+
+/**
+ * DOM utilities (not necessary using jQuery).
+ */
+
+/**
+ * Alternative to $.text(). Returns/replace the text of the element matched with the specified id.
+ * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
+ * In case of replace (text != null), if the element has multiple text nodes, text will be replaced in the first found.
+ */
+Komunalne.dom.elementText = function(id,text) {
+  var i,buf,aux = null;
+  var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
+  if (el != null) {
+    if (!el.hasChildNodes()) {
+      if (text != null) el.appendChild(document.createTextNode(text));
+      else text = "";
+    } else {
+      if (text != null) {
+        i = new Komunalne.helper.Iterator(el.childNodes);
+        while (i.hasNext()) {
+          aux = i.next();
+          if (aux.nodeType == 3) break;
+          else aux = null;
+        }
+        if (aux != null) aux.nodeValue = text;
+        else el.appendChild(document.createTextNode(text));
+      } else {
+        buf = [];
+        i = new Komunalne.helper.Iterator(el.childNodes);
+        while (i.hasNext()) {
+          aux = i.next();
+          if (aux.nodeType == 3) buf.push(aux.nodeValue);
+        }
+        text = buf.join();
+      }
+    }
+  } else text = null;
+  return text;
+};
+
+/**
+ * Formats a number as a currency.
+ * @param num Number object. Mandatory to be a number or a parseable number.
+ * @param nd (optional) Number of decimals, default to 2.
+ * @param ds (optional) Decimal separator, default to '.'.
+ * @param ms (optional) Milliard separator, default to ','.
+ */
+Komunalne.format.currency = function(num,nd,ds,ms){
+  if (!(typeof num == "number")) throw "Formatting a non-number";
+  nd = nd !== "" && nd !== null && !isNaN((nd = Math.abs(nd))) ? nd : 2;
+  ds = ds != undefined ? ds : ".";
+  ms = ms != undefined ? ms : ",";
+  var neg = num < 0 ? "-" : "";
+  var fix = num.toFixed(nd);
+  var ist = Math.abs(parseInt(fix)).toString();
+  var dec = Math.abs(fix).toString().substr(ist.length+1,nd);
+  dec = (dec.length < nd) ? dec + ((new Array(nd-dec.length+1)).join("0")) : dec;
+  var res = "";
+  var i = ist.length;
+  for (; (i-3)>0; i-=3) res = (ms+ist.substr(i-3,3)) + res;
+  res=neg + ist.substring(0,i) + res;
+  return res + (dec.length > 0 ? (ds+dec) : "");
+};
+
+/**
+ * Creates a capitalized string setting the first letter uppercase and the rest to lowercase.
+ * @param str String to be capitalized.
+ */
+Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
+
+/**
  * Executor function wrapper, with optional predefined scope.
  * @param method Method to be executed.
  * @param scope (optional) Method scope.
@@ -79,6 +220,80 @@ Komunalne.helper.Iterator.prototype.currentKey = function() {
   if (this.i === 0) throw Komunalne.helper.Iterator.keyError;
   return this.keys[this.i - 1];
 };
+
+/**
+ * Test case object build with a config object with the following properties (all optional):
+ * - expected Expected return value. Mandatory as it is the comparison value.
+ * - args Arguments to be passed to the target function, if any. Mandatory to be an array.
+ * - msg Test case message.
+ */
+Komunalne.test.Case = function(config) {
+  config = config || {};
+  this.expected = config.expected;
+  this.args = config.args;
+  this.msg = config.msg;
+};
+
+/**
+ * Test case execution of the expected value against (if any, if args) a method using a verification test.
+ * Both arguments need to be functions or instances of K.helper.Method.
+ * @param verifier Verifier method, usually constructed from QUnit.assert.buildFor K.js add-on.
+ * @param method (optional) Optional method execution, valid if and only if args property is set.
+ */
+Komunalne.test.Case.prototype.execute = function(verifier,method) {
+  var vargs = [];
+  verifier = Komunalne.test.Case.transform(verifier);
+  method = Komunalne.test.Case.transform(method);
+  if (this.expected !== undefined) vargs.push(this.expected);
+  if (method && Komunalne.util.isArray(this.args)) vargs.push(method.apply(this.args));
+  if (this.msg != undefined) vargs.push(this.msg.toString());
+  verifier.apply(vargs);
+};
+
+/**
+ * Transforms a function into a K.helper.Method object if needed.
+ */
+Komunalne.test.Case.transform = function(fn) {
+  return Komunalne.util.isFunction(fn) ? new Komunalne.helper.Method(fn) : fn;
+};
+
+/**
+ * Suite of testcases.
+ */
+Komunalne.test.Suite = function(cases) { 
+  this.cases = cases == undefined ? [] :
+    Komunalne.util.isArray(cases) ? cases :
+    cases instanceof Komunalne.test.Case ? [cases] : [];
+};
+Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
+Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
+Komunalne.test.Suite.prototype.add = function(ex,args,msg) { 
+  this.cases.push(new Komunalne.test.Case(ex,args,msg));
+};
+Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
+
+/**
+ * Execute a set of test cases.
+ * @param verifier Verifier method, function or instance of K.helper.Method.
+ * @param method (optional) Method to be executed against the expected value, function or instance of K.helper.Method.
+ */
+Komunalne.test.Suite.prototype.execute = function(verifier,method) {
+  var iterator = this.iterator();
+  verifier = Komunalne.test.Case.transform(verifier);
+  method = Komunalne.test.Case.transform(method);
+  while (iterator.hasNext()) {
+    iterator.next().execute(verifier,method);
+  }
+};
+
+/**
+ * Extending QUnit.assert to generate a K.helper.Method object.
+ */
+(function() {
+  if (window.QUnit) { 
+    QUnit.assert.buildFor = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
+  }
+})();
 
 /**
  * Generates a new string object from concatenating 'app' (appended) string (if present)
@@ -298,7 +513,6 @@ Komunalne.util.clone = function(obj,cfg) {
   };
   
   var clone = function(obj,cfg,skip) {
-    var wrapper;
     var c,i,fn;
     var subskip;
     
@@ -344,218 +558,3 @@ Komunalne.util.keys = function(obj) {
   for (var x in obj) keys.push(x);
   return keys;
 };
-
-/**
- * Komunalne.js jQuery utilities.
- */
-
-/**
- * Alternative to $.text() for jQuery objects. Returns/replace the text of the element matched with the specified id.
- * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
- */
-Komunalne.$.elementText = function(selector,text) {
-  return Komunalne.dom.elementText($(selector).get(0),text);
-};
-
-/**
- * Call this method to set the items that match the specified selectors with full screen height.
- * Method should be called within an $(function() { ... }) "onReady" block or when the screen is ready.
- */
-Komunalne.$.fullHeight = function(selectors) {
-  var adjustHeight;
-  adjustHeight = function(selector) { $(selector).css("min-height",$(window).height()); };
-  selectors = Komunalne.util.isArray(selectors) ? selectors : [selectors];
-  selectors.forEach(function(selector) {
-    var bind = adjustHeight.bind(null,selector);
-    $(window).resize(bind);
-    $(window).load(bind);
-  });
-};
-
-/**
- * DOM utilities (not necessary using jQuery).
- */
-
-/**
- * Alternative to $.text(). Returns/replace the text of the element matched with the specified id.
- * In contrast with $.text(), this returns/replace the text of the element matched only, not the descendants.
- * In case of replace (text != null), if the element has multiple text nodes, text will be replaced in the first found.
- */
-Komunalne.dom.elementText = function(id,text) {
-  var i,n,buf,aux;
-  var el = Komunalne.util.isInstanceOf(id,"string") ? document.getElementById(id) : id;
-  if (el != null) {
-    if (!el.hasChildNodes()) {
-      if (text != null) el.appendChild(document.createTextNode(text));
-      else text = "";
-    } else {
-      if (text != null) {
-        i = new Komunalne.helper.Iterator(el.childNodes);
-        while (i.hasNext()) {
-          aux = i.next();
-          if (aux.nodeType == 3) break;
-          else aux = null;
-        }
-        if (aux != null) aux.nodeValue = text;
-        else el.appendChild(document.createTextNode(text));
-      } else {
-        buf = [];
-        i = new Komunalne.helper.Iterator(el.childNodes);
-        while (i.hasNext()) {
-          aux = i.next();
-          if (aux.nodeType == 3) buf.push(aux.nodeValue);
-        }
-        text = buf.join();
-      }
-    }
-  } else text = null;
-  return text;
-};
-
-/**
- * Formats a number as a currency.
- * @param num Number object. Mandatory to be a number or a parseable number.
- * @param nd (optional) Number of decimals, default to 2.
- * @param ds (optional) Decimal separator, default to '.'.
- * @param ms (optional) Milliard separator, default to ','.
- */
-Komunalne.format.currency = function(num,nd,ds,ms){
-  if (!(typeof num == "number")) throw "Formatting a non-number";
-  nd = nd !== "" && nd !== null && !isNaN((nd = Math.abs(nd))) ? nd : 2;
-  ds = ds != undefined ? ds : ".";
-  ms = ms != undefined ? ms : ",";
-  var neg = num < 0 ? "-" : "";
-  var fix = num.toFixed(nd);
-  var ist = Math.abs(parseInt(fix)).toString();
-  var dec = Math.abs(fix).toString().substr(ist.length+1,nd);
-  dec = (dec.length < nd) ? dec + ((new Array(nd-dec.length+1)).join("0")) : dec;
-  var res = "";
-  var i = ist.length;
-  for (; (i-3)>0; i-=3) res = (ms+ist.substr(i-3,3)) + res;
-  res=neg + ist.substring(0,i) + res;
-  return res + (dec.length > 0 ? (ds+dec) : "");
-};
-
-/**
- * Creates a capitalized string setting the first letter uppercase and the rest to lowercase.
- * @param str String to be capitalized.
- */
-Komunalne.format.capitalize = function(str) { return str[0].toUpperCase() + str.substr(1).toLowerCase(); };
-
-/**
- * CSS Animation utils.
- */
-
-/**
- * Using Animate.css. Sets an animation to a target and quits after animation completes.
- * @see http://daneden.github.io/animate.css/
- */
-Komunalne.anim.animate = function(effect,target) {
-  var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-  return new Promise(function(resolve,reject) {
-    effect = Komunalne.util.append("animated",effect);
-    $(target).addClass(effect).one(ends,function() {
-      $(this).removeClass(effect);
-      resolve(this);
-    });
-  });
-};
-
-/**
- * Using Animate.css. Sets an animation to a target and quits after animation completes.
- * Includes handlers to execute before and after animation.
- * @see http://daneden.github.io/animate.css/
- */
-Komunalne.anim.animation = function(effect,target,before,after) {
-  var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-  var starts = 'webkitAnimationStart mozAnimationStart MSAnimationStart oanimationstart animationstart';
-  var resolver;
-  
-  effect = Komunalne.util.append("animated",effect);
-  target = $(target);
-  resolver = function(res,rej) {
-    var wrapAfter = function() {
-      target.removeClass(effect);
-      after(target);
-      res(target);
-    };
-    target.addClass(effect).one(starts,before).one(ends,wrapAfter);
-  };
-  
-  return new Promise(resolver);
-};
-
-
-/**
- * Test case object build with a config object with the following properties (all optional):
- * - expected Expected return value. Mandatory as it is the comparison value.
- * - args Arguments to be passed to the target function, if any. Mandatory to be an array.
- * - msg Test case message.
- */
-Komunalne.test.Case = function(config) {
-  config = config || {};
-  this.expected = config.expected;
-  this.args = config.args;
-  this.msg = config.msg;
-};
-
-/**
- * Test case execution of the expected value against (if any, if args) a method using a verification test.
- * Both arguments need to be functions or instances of K.helper.Method.
- * @param verifier Verifier method, usually constructed from QUnit.assert.buildFor K.js add-on.
- * @param method (optional) Optional method execution, valid if and only if args property is set.
- */
-Komunalne.test.Case.prototype.execute = function(verifier,method) {
-  var vargs = [];
-  verifier = Komunalne.test.Case.transform(verifier);
-  method = Komunalne.test.Case.transform(method);
-  if (this.expected !== undefined) vargs.push(this.expected);
-  if (method && Komunalne.util.isArray(this.args)) vargs.push(method.apply(this.args));
-  if (this.msg != undefined) vargs.push(this.msg.toString());
-  verifier.apply(vargs);
-};
-
-/**
- * Transforms a function into a K.helper.Method object if needed.
- */
-Komunalne.test.Case.transform = function(fn) {
-  return Komunalne.util.isFunction(fn) ? new Komunalne.helper.Method(fn) : fn;
-};
-
-/**
- * Suite of testcases.
- */
-Komunalne.test.Suite = function(cases) { 
-  this.cases = cases == undefined ? [] :
-    Komunalne.util.isArray(cases) ? cases :
-    cases instanceof Komunalne.test.Case ? [cases] : [];
-};
-Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
-Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
-Komunalne.test.Suite.prototype.add = function(ex,args,msg) { 
-  this.cases.push(new Komunalne.test.Case(ex,args,msg));
-};
-Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
-
-/**
- * Execute a set of test cases.
- * @param verifier Verifier method, function or instance of K.helper.Method.
- * @param method (optional) Method to be executed against the expected value, function or instance of K.helper.Method.
- */
-Komunalne.test.Suite.prototype.execute = function(verifier,method) {
-  var iterator = this.iterator();
-  verifier = Komunalne.test.Case.transform(verifier);
-  method = Komunalne.test.Case.transform(method);
-  while (iterator.hasNext()) {
-    iterator.next().execute(verifier,method);
-  }
-};
-
-/**
- * Extending QUnit.assert to generate a K.helper.Method object.
- */
-(function() {
-  if (window.QUnit) { 
-    QUnit.assert.buildFor = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
-  }
-})();

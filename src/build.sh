@@ -6,6 +6,7 @@ cat komunalne.init.js > komunalne.all.js
 for m in $mods
 do
   m="${m#*/}"
+  echo $m
   echo "" >> komunalne.all.js
   cat $m >> komunalne.all.js
 done

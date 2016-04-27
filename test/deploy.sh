@@ -23,6 +23,7 @@ do
   cd $i
   cp index.html $p
   cp komunalne.tests.js $p
+  cp ../../lib/* $p
   cd ../../$l
   if [ $l = "src" ]; then sh build.sh $i; fi
   cd $i
