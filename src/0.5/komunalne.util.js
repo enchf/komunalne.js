@@ -258,6 +258,13 @@ Komunalne.util.clone.invalidTarget = "Target object is null or not an object";
 Komunalne.util.keys = function(obj) {
   var keys = [];
   obj = (obj || {});
-  for (var x in obj) keys.push(x);
+  
+  for (var x in obj) {
+    if (Komunalne.isOldIE && Komunalne.util.isArray(obj) && (x == "indexOf" || x == "forEach")) {
+      continue;
+    }
+    keys.push(x);
+  }
+  
   return keys;
 };

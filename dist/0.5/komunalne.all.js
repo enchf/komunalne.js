@@ -10,6 +10,7 @@ Komunalne.test = {};
 Komunalne.$ = {};
 Komunalne.dom = {};
 Komunalne.anim = {};
+Komunalne.isOldIE = false;
 
 /* Shortcut if not defined already */
 if (window.K === undefined) window.K = Komunalne;
@@ -18,6 +19,7 @@ if (window.K === undefined) window.K = Komunalne;
  * Polyfill issues in IE 8-9.
  */
 if (typeof String.prototype.trim !== 'function') {
+  Komunalne.isOldIE = true;
   String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g, ''); 
   };
@@ -26,6 +28,7 @@ if (typeof String.prototype.trim !== 'function') {
 //Production steps of ECMA-262, Edition 5, 15.4.4.14
 //Reference: http://es5.github.io/#x15.4.4.14
 if (!Array.prototype.indexOf) {
+  Komunalne.isOldIE = true;
   Array.prototype.indexOf = function(searchElement, fromIndex) {
     var k;
 
@@ -91,6 +94,7 @@ if (!Array.prototype.indexOf) {
 //Production steps of ECMA-262, Edition 5, 15.4.4.18
 //Reference: http://es5.github.io/#x15.4.4.18
 if (!Array.prototype.forEach) {
+  Komunalne.isOldIE = true;
   Array.prototype.forEach = function(callback, thisArg) {
     var T = undefined, k;
 
@@ -689,6 +693,13 @@ Komunalne.util.clone.invalidTarget = "Target object is null or not an object";
 Komunalne.util.keys = function(obj) {
   var keys = [];
   obj = (obj || {});
-  for (var x in obj) keys.push(x);
+  
+  for (var x in obj) {
+    if (Komunalne.isOldIE && Komunalne.util.isArray(obj) && (x == "indexOf" || x == "forEach")) {
+      continue;
+    }
+    keys.push(x);
+  }
+  
   return keys;
 };
