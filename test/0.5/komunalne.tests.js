@@ -236,7 +236,7 @@ QUnit.test("Date, Function, Iterable and Array type test functions", function(as
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
   
-  for (var i in all) {
+  for (var i = 0; i < all.length; i++) {
     suite = new Komunalne.test.Suite();
     for (var obj in testData) {
       result = all[i].indexOf(obj) >= 0;

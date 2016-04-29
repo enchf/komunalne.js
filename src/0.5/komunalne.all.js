@@ -152,6 +152,34 @@ if (!Array.prototype.forEach) {
   };
 }
 
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function(oThis) {
+    if (typeof this !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+    }
+
+    var aArgs   = Array.prototype.slice.call(arguments, 1),
+      fToBind = this,
+      fNOP    = function() {},
+      fBound  = function() {
+        return fToBind.apply(this instanceof fNOP
+               ? this
+               : oThis,
+               aArgs.concat(Array.prototype.slice.call(arguments)));
+      };
+
+    if (this.prototype) {
+      // Function.prototype doesn't have a prototype property
+      fNOP.prototype = this.prototype; 
+    }
+    fBound.prototype = new fNOP();
+
+    return fBound;
+  };
+}
+
 /**
  * Komunalne.js jQuery utilities.
  */
@@ -644,7 +672,12 @@ Komunalne.util.clone = function(obj,cfg) {
   innerSkip = function(skip) {
     var index;
     var clone = Komunalne.util.clone(skip);
-    for (var i in clone) {
+    var iterator = new Komunalne.helper.Iterator(clone);
+    var next,i;
+    
+    while (iterator.hasNext()) {
+      next = iterator.next();
+      i = iterator.currentKey();
       clone[i] = ((index = clone[i].indexOf(".")) >= 0) ? clone[i].substr(index+1) : "";
     }
     return clone;
@@ -695,7 +728,13 @@ Komunalne.util.keys = function(obj) {
   obj = (obj || {});
   
   for (var x in obj) {
-    if (Komunalne.isOldIE && Komunalne.util.isArray(obj) && (x == "indexOf" || x == "forEach")) {
+    if (Komunalne.isOldIE && 
+      (
+        (Komunalne.util.isArray(obj) && (x == "indexOf" || x == "forEach")) ||
+        (Komunalne.util.isInstanceOf(obj,"string") && (x == "trim")) ||
+        (Komunalne.util.isFunction(obj) && (x == "bind"))
+      )
+    ) {
       continue;
     }
     keys.push(x);
