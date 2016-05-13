@@ -104,8 +104,12 @@ QUnit.test("Iterator implementation", function(assert) {
   w = new Komunalne.helper.Iterator(v);
   
   // Wrapper for the exception tests.
-  var wrapper = function(iterator) { return function() { iterator.next(); }; };
-  var keyWrapper = function(iterator) { return function() { iterator.currentKey(); }; };
+  var wrapper = function(iterator) { 
+    return iterator.next.bind(iterator);
+  };
+  var keyWrapper = function(iterator) { 
+    return iterator.currentKey.bind(iterator);
+  };
   
   assert.strictEqual(a.hasNext(),false,"No next item on empty object");
   assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
