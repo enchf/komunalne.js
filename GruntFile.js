@@ -15,11 +15,15 @@ module.exports = function(grunt) {
         src: '<%= pkg.name %>.js',
         dest: '<%= pkg.name %>.min.js'
       }
+    },
+    qunit: {
+      all: ['test/*.html']
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
 
-  grunt.registerTask('default',['concat','uglify']);
+  grunt.registerTask('default',['concat','uglify','qunit']);
 };
