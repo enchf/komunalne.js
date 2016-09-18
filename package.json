@@ -1,0 +1,31 @@
+{
+  "name": "komunalne",
+  "version": "0.5.0",
+  "description": "General Javascript Util for Web tasks",
+  "keywords": [
+    "util",
+    "functional",
+    "browser",
+    "web"
+  ],
+  "license": "MIT",
+  "author": "Ernesto <e.ernesto.espinosa@gmail.com>",
+  "files": [
+    "komunalne.js",
+    "komunalne.min.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/enchf/komunalne.js.git"
+  },
+  "dependencies": {
+    "es6-promise-polyfill": "~1.1.1",
+    "jquery": "~1.11.3",
+    "animate.css": "~3.5.1"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "qunit": "~1.18"
+  },
+  "private": false
+}

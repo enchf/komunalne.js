@@ -5,6 +5,7 @@
 
 # Ignore bower dependencies.
 bower_components/
+node_modules/
 
 # Ignore Webserver path file.
 **/test.target
