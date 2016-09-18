@@ -1,3 +1,4 @@
+/*! komunalne 2016-09-18 */
 /**
  * Komunalne.js - Javascript utils compilation.
  * Object definition.
