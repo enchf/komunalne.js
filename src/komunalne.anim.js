@@ -26,7 +26,7 @@ Komunalne.anim.animation = function(effect,target,before,after) {
   var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
   var starts = 'webkitAnimationStart mozAnimationStart MSAnimationStart oanimationstart animationstart';
   var resolver;
-  
+
   effect = Komunalne.util.append("animated",effect);
   target = $(target);
   resolver = function(res,rej) {
@@ -37,7 +37,7 @@ Komunalne.anim.animation = function(effect,target,before,after) {
     };
     target.addClass(effect).one(starts,before).one(ends,wrapAfter);
   };
-  
+
   return new Promise(resolver);
 };
 

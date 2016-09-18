@@ -59,7 +59,7 @@ Komunalne.helper.Iterator.prototype.remaining = function() { return this.length(
 /**
  * Returns the key (numeric in case of an array/arguments, the key in case of an object) of the last returned element.
  */
-Komunalne.helper.Iterator.prototype.currentKey = function() { 
+Komunalne.helper.Iterator.prototype.currentKey = function() {
   if (this.i === 0) throw Komunalne.helper.Iterator.keyError;
   return this.keys[this.i - 1];
 };

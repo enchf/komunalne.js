@@ -1,4 +1,10 @@
-#Ignore MacOS and Eclipse files
+# Ignore MacOS and Eclipse files
 **/.DS_Store
 .project
 .settings
+
+# Ignore bower dependencies.
+bower_components/
+
+# Ignore Webserver path file.
+**/test.target

@@ -37,14 +37,14 @@ Komunalne.test.Case.transform = function(fn) {
 /**
  * Suite of testcases.
  */
-Komunalne.test.Suite = function(cases) { 
+Komunalne.test.Suite = function(cases) {
   this.cases = cases == undefined ? [] :
     Komunalne.util.isArray(cases) ? cases :
     cases instanceof Komunalne.test.Case ? [cases] : [];
 };
 Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
 Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
-Komunalne.test.Suite.prototype.add = function(ex,args,msg) { 
+Komunalne.test.Suite.prototype.add = function(ex,args,msg) {
   this.cases.push(new Komunalne.test.Case(ex,args,msg));
 };
 Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
@@ -67,7 +67,7 @@ Komunalne.test.Suite.prototype.execute = function(verifier,method) {
  * Extending QUnit.assert to generate a K.helper.Method object.
  */
 (function() {
-  if (window.QUnit) { 
+  if (window.QUnit) {
     QUnit.assert.buildFor = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
   }
 })();

@@ -19,7 +19,7 @@ if (window.K === undefined) window.K = Komunalne;
  */
 if (typeof String.prototype.trim !== 'function') {
   String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/g, ''); 
+    return this.replace(/^\s+|\s+$/g, '');
   };
 }
 
@@ -107,7 +107,7 @@ if (!Array.prototype.forEach) {
     // 3. Let len be toUint32(lenValue).
     var len = O.length >>> 0;
 
-    // 4. If isCallable(callback) is false, throw a TypeError exception. 
+    // 4. If isCallable(callback) is false, throw a TypeError exception.
     // See: http://es5.github.com/#x9.11
     if (typeof callback !== "function") {
       throw new TypeError(callback + ' is not a function');
@@ -203,7 +203,7 @@ Komunalne.anim.animation = function(effect,target,before,after) {
   var ends = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
   var starts = 'webkitAnimationStart mozAnimationStart MSAnimationStart oanimationstart animationstart';
   var resolver;
-  
+
   effect = Komunalne.util.append("animated",effect);
   target = $(target);
   resolver = function(res,rej) {
@@ -214,7 +214,7 @@ Komunalne.anim.animation = function(effect,target,before,after) {
     };
     target.addClass(effect).one(starts,before).one(ends,wrapAfter);
   };
-  
+
   return new Promise(resolver);
 };
 
@@ -350,7 +350,7 @@ Komunalne.helper.Iterator.prototype.remaining = function() { return this.length(
 /**
  * Returns the key (numeric in case of an array/arguments, the key in case of an object) of the last returned element.
  */
-Komunalne.helper.Iterator.prototype.currentKey = function() { 
+Komunalne.helper.Iterator.prototype.currentKey = function() {
   if (this.i === 0) throw Komunalne.helper.Iterator.keyError;
   return this.keys[this.i - 1];
 };
@@ -394,14 +394,14 @@ Komunalne.test.Case.transform = function(fn) {
 /**
  * Suite of testcases.
  */
-Komunalne.test.Suite = function(cases) { 
+Komunalne.test.Suite = function(cases) {
   this.cases = cases == undefined ? [] :
     Komunalne.util.isArray(cases) ? cases :
     cases instanceof Komunalne.test.Case ? [cases] : [];
 };
 Komunalne.test.Suite.prototype.size = function() { return this.cases.length; };
 Komunalne.test.Suite.prototype.iterator = function() { return new Komunalne.helper.Iterator(this.cases); };
-Komunalne.test.Suite.prototype.add = function(ex,args,msg) { 
+Komunalne.test.Suite.prototype.add = function(ex,args,msg) {
   this.cases.push(new Komunalne.test.Case(ex,args,msg));
 };
 Komunalne.test.Suite.prototype.clear = function() { this.cases = []; };
@@ -424,7 +424,7 @@ Komunalne.test.Suite.prototype.execute = function(verifier,method) {
  * Extending QUnit.assert to generate a K.helper.Method object.
  */
 (function() {
-  if (window.QUnit) { 
+  if (window.QUnit) {
     QUnit.assert.buildFor = function(fn) { return new Komunalne.helper.Method(this[fn],this); };
   }
 })();
@@ -437,7 +437,7 @@ Komunalne.test.Suite.prototype.execute = function(verifier,method) {
  * @param app Second place string, optional, default = ''.
  * @param sep Above strings separator, optional, default = ' '.
  */
-Komunalne.util.append = function(str,app,sep) { 
+Komunalne.util.append = function(str,app,sep) {
   return ((str||"") + (sep||" ") + (app||"")).trim();
 };
 
@@ -453,7 +453,7 @@ Komunalne.util.path = function(obj,path) {
   var paths = path.split(".");
   var el = obj;
   for (var p in paths) {
-    if (Komunalne.util.isInstanceOf(el,Object) && el[paths[p]] !== undefined) el = el[paths[p]]; 
+    if (Komunalne.util.isInstanceOf(el,Object) && el[paths[p]] !== undefined) el = el[paths[p]];
     else { el = null; break; }
   }
   return el;
@@ -465,8 +465,8 @@ Komunalne.util.path = function(obj,path) {
  * @param date Object to be validated as date.
  * @param strict True to check the date validity, false to only check the type.
  */
-Komunalne.util.isDate = function(date,strict) { 
-  return (date instanceof Date) && (!strict || !isNaN(date.valueOf())); 
+Komunalne.util.isDate = function(date,strict) {
+  return (date instanceof Date) && (!strict || !isNaN(date.valueOf()));
 };
 
 /**
@@ -479,7 +479,7 @@ Komunalne.util.isFunction = function(obj) { return typeof obj == "function"; };
  * Returns true if the object is iterable in a 'for (var x in obj) {}' statement.
  * @param obj Object to be validated as iterable.
  */
-Komunalne.util.isIterable = function(obj) { 
+Komunalne.util.isIterable = function(obj) {
   return typeof obj == "object" && obj != undefined && !Komunalne.util.isDate(obj);
 };
 
@@ -487,8 +487,8 @@ Komunalne.util.isIterable = function(obj) {
  * Returns true if the object is an Array.
  * @param obj Object to be validated as an array.
  */
-Komunalne.util.isArray = function(obj) { 
-  return Komunalne.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
+Komunalne.util.isArray = function(obj) {
+  return Komunalne.util.isIterable(obj) && obj.constructor && obj.constructor == Array;
 };
 
 /**
@@ -538,12 +538,12 @@ Komunalne.util.deepEquals = function(a,b) {
   var equal = true;
   ai = Komunalne.util.isIterable(a);
   bi = Komunalne.util.isIterable(b);
-  
+
   if (ai && bi && (equal = Komunalne.util.areSameClass(a,b))) {
     ait = new Komunalne.helper.Iterator(a);
     bit = new Komunalne.helper.Iterator(b);
     equal = ait.length() == bit.length();
-    
+
     while (ait.hasNext() && equal) {
       an = ait.next();
       bn = bit.next();
@@ -551,7 +551,7 @@ Komunalne.util.deepEquals = function(a,b) {
       equal = equal && ait.currentKey() == bit.currentKey();
     }
   } else equal = (ai == bi && a === b);
-  
+
   return equal;
 };
 
@@ -626,15 +626,15 @@ Komunalne.util.clone = function(obj,cfg) {
   var first = true;
   var replica,refer;
   var skip,innerSkip;
-  
+
   cfg = (cfg || {});
   if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
     throw Komunalne.util.clone.invalidTarget;
   }
   replica = function(val,skip) { return clone(val,cfg,skip); };
   refer = function(val) { return val; };
-  skip = ("skip" in cfg) ? 
-          ((Komunalne.util.isArray(cfg.skip) && Komunalne.util.isArrayOf(cfg.skip,"string")) ? cfg.skip 
+  skip = ("skip" in cfg) ?
+          ((Komunalne.util.isArray(cfg.skip) && Komunalne.util.isArrayOf(cfg.skip,"string")) ? cfg.skip
           : (Komunalne.util.isInstanceOf(cfg.skip,"string")) ? [cfg.skip] : [])
         : [];
   innerSkip = function(skip) {
@@ -645,11 +645,11 @@ Komunalne.util.clone = function(obj,cfg) {
     }
     return clone;
   };
-  
+
   var clone = function(obj,cfg,skip) {
     var c,i,fn;
     var subskip;
-    
+
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj.getTime());
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
@@ -659,7 +659,7 @@ Komunalne.util.clone = function(obj,cfg) {
       // If something fails, the object is passed as reference.
       if (first && "into" in cfg) c = cfg.into;
       else {
-        try { c = new obj.constructor(); } 
+        try { c = new obj.constructor(); }
         catch (e) { c = obj; }
       }
       clones.push(c);
@@ -676,7 +676,7 @@ Komunalne.util.clone = function(obj,cfg) {
         c[x] = (cfg.safe !== true || c[x] === undefined) ? fn(obj[x],subskip) : c[x];
       }
     }
-    
+
     return c;
   };
   return clone(obj,cfg,skip);

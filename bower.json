@@ -1,0 +1,32 @@
+{
+  "name": "komunalne.js",
+  "description": "General Utility for Javascript tasks",
+  "main": "k.js",
+  "dependencies": {
+    "es6-promise-polyfill": "~1.1.1",
+    "jquery": "~1.11.3",
+    "animate.css": "~3.5.1"
+  },
+  "devDependencies": {
+    "qunit": "~1.18"
+  },
+  "keywords": [
+    "util",
+    "functional",
+    "browser"
+  ],
+  "authors": [
+    "enchf"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/enchf/komunalne.js.git"
+  },
+  "ignore": [
+    "test",
+    "bower_components",
+    "node_modules"
+  ],
+  "license": "MIT",
+  "private": false
+}

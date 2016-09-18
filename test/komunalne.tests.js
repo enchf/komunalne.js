@@ -34,7 +34,7 @@ var dataNames = {};
 })();
 
 var testDataTypes = {
-  "object": { "type": "object", "apply": 
+  "object": { "type": "object", "apply":
              ["t","u","empty-object","empty-array","null","date","invalid-date","array","object"] },
   "Array": { "type": Array, "apply": ["empty-array","array"] },
   "undefined": { "type": "undefined", "apply": ["undefined"] },
@@ -65,19 +65,19 @@ QUnit.test("Komunalne.js Definition", function(assert) {
 QUnit.test("Unit test executor", function(assert) {
   var suite = new Komunalne.test.Suite();
   var i = 1;
-  
+
   suite.add({ "expected": 1 });
   suite.add({ "expected": 2, "args": ["Fake",2] });
   suite.add({ "expected": 3, "args": ["Fake",3], "msg": "Message" });
-  
+
   suite.execute(function(a,b,c) {
     assert.equal(a,arguments.length,"Arguments number for object " + i);
     assert.equal(a,i,"Execution order " + (i++));
   },function(name,x) { return x; });
-  
+
   var ignoreOnlyNullOrUndefined = new Komunalne.test.Case(
     { "expected": "", "args": [], "msg": "Append without arguments" });
-  var funct = function(a,b,c) { 
+  var funct = function(a,b,c) {
     assert.equal(arguments.length, 3, "Preventing to avoid skip false-able values ('',false,...)");
     assert.deepEqual(a,"","Check to prevent skipping empty strings");
     assert.equal(b,"","Check to prevent skipping empty strings");
@@ -89,7 +89,7 @@ QUnit.test("Unit test executor", function(assert) {
 QUnit.test("Iterator implementation", function(assert) {
   var a,b,c,d,e,f,g,h,v,w;
   var nextError = Komunalne.helper.Iterator.nextError;
-  
+
   a = new Komunalne.helper.Iterator(testData["empty-object"]);
   b = new Komunalne.helper.Iterator(testData.object);
   c = new Komunalne.helper.Iterator(testData["empty-array"]);
@@ -102,11 +102,11 @@ QUnit.test("Iterator implementation", function(assert) {
   v.a = "1";
   v.b = 5;
   w = new Komunalne.helper.Iterator(v);
-  
+
   // Wrapper for the exception tests.
   var wrapper = function(iterator) { return function() { iterator.next(); }; };
   var keyWrapper = function(iterator) { return function() { iterator.currentKey(); }; };
-  
+
   assert.strictEqual(a.hasNext(),false,"No next item on empty object");
   assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
   assert.strictEqual(c.hasNext(),false,"No next item on empty array");
@@ -114,7 +114,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(g.hasNext(),false,"No next item on empty arguments iterator");
   assert.strictEqual(h.hasNext(),true,"Arguments iterator has next item");
   assert.strictEqual(w.hasNext(),true,"Array with properties iterator has next item");
-  
+
   assert.strictEqual(a.length(),0,"Length of empty object is 0");
   assert.strictEqual(b.length(),4,"Length of test data object");
   assert.strictEqual(c.length(),0,"Length of empty array is 0");
@@ -122,7 +122,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(g.length(),0,"Length of empty arguments iterator is 0");
   assert.strictEqual(h.length(),3,"Length of arguments iterator");
   assert.strictEqual(w.length(),5,"Length of array with properties iterator");
-  
+
   assert.throws(keyWrapper(a),Komunalne.helper.Iterator.keyError,
                 "Exception calling currenty key before next, empty object iterator");
   assert.throws(keyWrapper(b),Komunalne.helper.Iterator.keyError,
@@ -137,7 +137,7 @@ QUnit.test("Iterator implementation", function(assert) {
                 "Exception calling currenty key before next, arguments iterator");
   assert.throws(keyWrapper(w),Komunalne.helper.Iterator.keyError,
                 "Exception calling current key before next, array with properties iterator");
-  
+
   assert.strictEqual(b.next(),1,"First item retrieval on object iterator");
   assert.equal(b.currentKey(),"a","First item key on object iterator");
   assert.strictEqual(d.next(),1,"First item retrieval on array iterator");
@@ -146,7 +146,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.equal(h.currentKey(),0,"First item key on array iterator");
   assert.strictEqual(w.next(),1,"First item retrieval on array with properties iterator");
   assert.equal(w.currentKey(),0,"First key on array with properties should be the index 0");
-  
+
   assert.strictEqual(b.remaining(),3,"Remaining function working properly on object iterator");
   assert.strictEqual(d.remaining(),2,"Remaining function working properly on array iterator");
   assert.strictEqual(b.length(),4,"Length unchanged after moving forward on object iterator");
@@ -155,7 +155,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(e.remaining(),4,"Iterator created with same object unchanged after move forward");
   assert.strictEqual(f.remaining(),3,"Iterator created with same array unchanged after move forward");
   assert.strictEqual(w.remaining(),4,"Remaining function working properly on array with properties iterator");
-  
+
   assert.throws(wrapper(a),nextError + "0","Exception thrown calling next on empty object iterator");
   assert.throws(wrapper(c),nextError + "0","Exception thrown calling next on empty array iterator");
   assert.throws(wrapper(g),nextError + "0","Exception thrown calling next on empty array iterator");
@@ -188,7 +188,7 @@ QUnit.test("Iterator implementation", function(assert) {
   assert.strictEqual(h.length(),3,"Length unchanged after exhausting arguments iterator");
   assert.strictEqual(h.remaining(),0,"Remaining is 0 even after multiple next calls on exhausted arguments iterator");
   assert.strictEqual(h.hasNext(),false,"No next element on exhausted arguments iterator");
-  
+
   assert.strictEqual(w.next(),2,"Retrieval order on array with properties iterator, second array element");
   assert.equal(w.currentKey(),1,"Key order on array with properties iterator, second array element");
   assert.strictEqual(w.next(),3,"Retrieval order on array with properties iterator, third array element");
@@ -201,7 +201,7 @@ QUnit.test("Iterator implementation", function(assert) {
 
 QUnit.test("Append util function", function(assert) {
   var suite = new Komunalne.test.Suite();
-  
+
   suite.add({ "expected": "", "args": [], "msg": "Call to append without arguments" });
   suite.add({ "expected": "", "args": [""], "msg": "Call to append with empty string" });
   suite.add({ "expected": "Str", "args": ["Str"], "msg": "Call to append with single string" });
@@ -211,7 +211,7 @@ QUnit.test("Append util function", function(assert) {
   suite.add({ "expected": "AC", "args": ["A",null,"C"], "msg": "Append null with separator" });
   suite.add({ "expected": "B", "args": [null,"B"], "msg": "Append string to null" });
   suite.add({ "expected": "CB", "args": [null,"B","C"], "msg": "Append string to null with separator" });
-  
+
   suite.execute(assert.buildFor("equal"),Komunalne.util.append);
 });
 
@@ -224,7 +224,7 @@ QUnit.test("Path lookup function", function(assert) {
   suite.add({ "expected": null, "args": [obj,"d.i.f"], "msg": "Test unreachable path === null" });
   suite.add({ "expected": null, "args": [obj,"a.b"], "msg": "Test try to go deep into a non object" });
   suite.add({ "expected": null, "args": [null,"a.b"], "msg": "Test try to go deep into null" });
-  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.path); 
+  suite.execute(assert.buildFor("strictEqual"),Komunalne.util.path);
 });
 
 QUnit.test("Date, Function, Iterable and Array type test functions", function(assert) {
@@ -235,13 +235,13 @@ QUnit.test("Date, Function, Iterable and Array type test functions", function(as
   var suite,result,msg;
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
-  
+
   for (var i in all) {
     suite = new Komunalne.test.Suite();
     for (var obj in testData) {
       result = all[i].indexOf(obj) >= 0;
       msg = dataNames[obj] + " is" + (result ? " " : " not ") + "true for " + fns[i];
-      suite.add({ "expected": result, "args": [testData[obj]], "msg": msg }); 
+      suite.add({ "expected": result, "args": [testData[obj]], "msg": msg });
     }
     suite.execute(assert.buildFor("strictEqual"),Komunalne.util[fns[i]]);
   }
@@ -251,7 +251,7 @@ QUnit.test("Date type test in strict mode", function(assert) {
   var suite = new Komunalne.test.Suite();
   var result,msg;
   var dateStrictTest = "date";
-  
+
   for (var obj in testData) {
     result = obj === dateStrictTest;
     msg = dataNames[obj] + " is" + (result ? " " : " not ") + "a valid date object";
@@ -268,7 +268,7 @@ QUnit.test("Is instance of type test", function(assert) {
       res = Komunalne.util.arrayContains(obj,testDataTypes[typ].apply);
       t = testDataTypes[typ].type;
       suite.add({ "expected": res, "args": [testData[obj],testDataTypes[typ].type],
-                  "msg": "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type " 
+                  "msg": "Object " + dataNames[obj] + " is " + (res ? "" : " not ") + " an object of type "
                 + (typeof t == "string" ? t : (t.name || "Custom Type")) });
     }
   }
@@ -293,8 +293,8 @@ QUnit.test("Is Array of search", function(assert) {
 
 QUnit.test("Are of same class? comparison", function(assert) {
   var suite = new Komunalne.test.Suite();
-  var data = { 
-    "number": 1, "boolean": true, "string": "str", "object":{}, "array": [1,2], "function": T, "t": new T(), "u": new U() 
+  var data = {
+    "number": 1, "boolean": true, "string": "str", "object":{}, "array": [1,2], "function": T, "t": new T(), "u": new U()
   };
   var data2 = {
     "number": 2, "boolean": false, "string": "", "object":{a:1}, "array": [], "function": U, "t": new T(), "u": new U()
@@ -319,7 +319,7 @@ QUnit.test("Deep equals", function(assert) {
   suite.add({ "args": [{"a":[1,2],"b":{a:1},"c":1},{"a":[1,2],"b":{a:1},"c":1}], "msg": "Equal mixed objects" });
   suite.add({ "args": [new T(),new T()], "msg": "Equal objects of custom types" });
   suite.execute(assert.buildFor("ok"),Komunalne.util.deepEquals);
-  
+
   suite.clear();
   suite.add({ "args": [[1,2,3],[3,2,1]], "msg": "Comparing reversed arrays" });
   suite.add({ "args": [[1,2,3,4],[1,2,3]], "msg": "Comparing almost equal arrays" });
@@ -342,7 +342,7 @@ QUnit.test("Deep equals", function(assert) {
 QUnit.test("Array lookup functions (array contains and is any of?)", function(assert) {
   var aux;
   var suite = new Komunalne.test.Suite();
-  
+
   suite.add({ "args": [1,[1,2,3]], "msg": "Lookup for existing element" });
   suite.add({ "args": [(aux=new T()),[new T(),aux,{}]], "msg": "Lookup for objects where is present the same instance" });
   suite.add({ "args": [new T(),[new T(),new T()],true], "msg": "Lookup for equally objects using deep equals flag" });
@@ -353,13 +353,13 @@ QUnit.test("Array lookup functions (array contains and is any of?)", function(as
   suite.clear();
   suite.add({ "args": [0,[1,2,3]], "msg": "Lookup for non existing element" });
   suite.add({ "args": [new T(),[new T(),new T()]], "msg": "Lookup for objects but not exactly the same instance" });
-  suite.add({ "args": [new T(),[new T(),new T()],"true"], 
+  suite.add({ "args": [new T(),[new T(),new T()],"true"],
               "msg": "Lookup for equally objects using non strict deep equals flag" });
   suite.add({ "args": [{a:1},[{c:{a:1}},2,""],true], "msg": "Lookup for unexisting object" });
   suite.add({ "args": [{a:1},[{a:2},{a:1},{a:3}]], "msg": "Lookup for existing object without deep equals flag" });
   suite.add({ "args": [[1,2],[[1,3],[1,2]]], "msg": "Lookup for arrays without deep equals flag" });
   suite.execute(assert.buildFor("notOk"),Komunalne.util.arrayContains);
-  
+
   suite.clear();
   suite.add({ "args": [1,2,3,4,1,5], "msg": "Lookup for existing integer in arguments list" });
   suite.add({ "args": ["1",2,3,"4",1,"1",5], "msg": "Lookup in mixed-type array for existing element" });
@@ -387,50 +387,50 @@ QUnit.test("For each function for objects, arguments and arrays", function(asser
   var str = "";
   var keys = "";
   var current = null;
-  var test = function(x,i,obj) { 
-    str += x; 
+  var test = function(x,i,obj) {
+    str += x;
     keys += i;
     assert.equal(obj,current,"Validation of iterated object as argument");
   };
-  var fn = function() { 
+  var fn = function() {
     current = arguments;
     Komunalne.util.forEach(arguments,test);
   };
-  var F = function(obj) { 
+  var F = function(obj) {
     this.str = "";
     this.keys = "";
     this.obj = obj;
   };
-  F.prototype.fn = function(x,i,obj) { 
+  F.prototype.fn = function(x,i,obj) {
     this.str += x;
     this.keys += i;
     assert.equal(obj,this.obj,"Validation of iterated object as argument in scoped calls");
   };
   var f;
-  
+
   current = [1,2,3];
   Komunalne.util.forEach(current,test);
   assert.strictEqual(str,"123","For each in array: values");
   assert.strictEqual(keys,"012","For each in array: keys");
   str = "";
   keys = "";
-  
+
   current = {a:1,b:2,c:4};
   Komunalne.util.forEach(current,test);
   assert.strictEqual(str,"124","For each in object: values");
   assert.strictEqual(keys,"abc","For each in object: keys");
   str = "";
   keys = "";
-  
+
   fn(1,2,3,5,8);
   assert.strictEqual(str,"12358","For each with arguments: values");
   assert.strictEqual(keys,"01234","For each with arguments: keys");
-  
+
   f = new F([3,2,1]);
   Komunalne.util.forEach(f.obj,f.fn,f);
   assert.strictEqual(f.str,"321","For each with scope and array: values");
   assert.strictEqual(f.keys,"012","For each with scope and array: keys");
-  
+
   f = new F({a:true,b:false});
   Komunalne.util.forEach(f.obj,f.fn,f);
   assert.strictEqual(f.str,"truefalse","For each with scope and object: values");
@@ -450,7 +450,7 @@ QUnit.test("Cloning objects", function(assert) {
   var j = {a:0,b:1};
   var k = {x:j}; k.x.c = j;
   var w,suite;
-  
+
   suite = new Komunalne.test.Suite();
   suite.add({ "args": [1], "expected": 1, "msg": "Cloning a number" });
   suite.add({ "args": [1,{ "deep": true }], "expected": 1, "msg": "Cloning 'deep' a number" });
@@ -463,7 +463,7 @@ QUnit.test("Cloning objects", function(assert) {
   suite.add({ "args": ["str"], "expected": "str", "msg": "Cloning a string" });
   suite.add({ "args": ["str",{ "deep": true }], "expected": "str", "msg": "Cloning 'deep' a string" });
   suite.execute(assert.buildFor("strictEqual"),Komunalne.util.clone);
-  
+
   w = Komunalne.util.clone(undefined);
   assert.strictEqual(w,undefined,"Cloning undefined");
   w = Komunalne.util.clone(undefined,{ "deep": true });
@@ -472,7 +472,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(w.getTime(),g.getTime(),"Cloning a Date");
   w = Komunalne.util.clone(g,{ "deep": true });
   assert.strictEqual(w.getTime(),g.getTime(),"Cloning 'deep' a Date");
-  
+
   /* Cloning an array */
   w = Komunalne.util.clone(a);
   assert.ok(Komunalne.util.isArray(w),"Ensuring an array is cloned");
@@ -486,7 +486,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notDeepEqual(a,w,"Changing original array, checking clone not affected");
   assert.notStrictEqual(a.length,w.length,"Changing original array, checking clone not affected: length");
   assert.notStrictEqual(a[1],w[1],"Changing original array, checking clone not affected: Random index");
-  
+
   /* Cloning an array with deep flag */
   w = Komunalne.util.clone(a,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Ensuring an array is 'deep' cloned");
@@ -500,7 +500,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notDeepEqual(a,w,"Changing original array, checking deep clone not affected");
   assert.notStrictEqual(a.length,w.length,"Changing original array, checking deep clone not affected: length");
   assert.notStrictEqual(a[1],w[1],"Changing original array, checking deep clone not affected: Random index");
-  
+
   /* Cloning an array with properties */
   w = Komunalne.util.clone(b);
   assert.ok(Komunalne.util.isArray(w),"Array with properties type is cloned");
@@ -521,7 +521,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(b.a,w.a,"Changing cloned array, checking clone not affected: Random index");
   assert.notStrictEqual(b.b,w.b,"Changing cloned array, checking clone not affected: Random index");
   assert.notOk(w.c,"Not defined property added to original array");
-  
+
   /* Cloning an array with properties with deep flag */
   w = Komunalne.util.clone(b,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Array with properties type is 'deep' cloned");
@@ -542,7 +542,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(b.a,w.a,"Changing original array with properties, checking properties in deep clone");
   assert.notStrictEqual(b.b,w.b,"Changing original array with properties, checking properties in deep clone");
   assert.notOk(w.d,"Property added to original array with properties not defined in clone");
-  
+
   /* Cloning a custom type object */
   w = Komunalne.util.clone(d);
   assert.ok(Komunalne.util.isInstanceOf(w,c),"Ensuring type is correctly set");
@@ -556,7 +556,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.d,"New attribute set in original not in clone");
   assert.notDeepEqual(w,d,"Clone not equal after modifying the original");
   assert.notStrictEqual(w.a,d.a,"Properties in the cloned custom object: Set in constructor");
-  
+
   /* Cloning a custom type object with deep flag */
   d = new c(); d.b = 3; d.c = 4;
   w = Komunalne.util.clone(d);
@@ -571,7 +571,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.d,"New attribute set in original not in deep clone");
   assert.notDeepEqual(w,d,"Deep clone not equal after modifying the original");
   assert.notStrictEqual(w.a,d.a,"Properties in the deep cloned custom object: Set in constructor");
-  
+
   /* Cloning a custom type object - II */
   w = Komunalne.util.clone(e);
   assert.ok(Komunalne.util.isInstanceOf(w,c),"Custom type set in clone");
@@ -585,7 +585,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.d,"New attribute set in original not in second object clone");
   assert.notDeepEqual(w,e,"Ensuring the second custom object is cloned");
   assert.notStrictEqual(w.a,e.a,"Properties in the second cloned custom object: Set in constructor");
-  
+
   /* Cloning a custom type object with deep flag - II */
   e = new c();
   w = Komunalne.util.clone(e,{ "deep": true });
@@ -601,7 +601,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notOk(w.d,"New attribute set in original not in second object deep clone");
   assert.notDeepEqual(w,e,"Ensuring the second custom object is deep cloned");
   assert.notStrictEqual(w.a,e.a,"Properties in the second deep cloned custom object: Set in constructor");
-  
+
   /* Cloning an object with object and array subproperties */
   w = Komunalne.util.clone(f);
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Object type set when cloning");
@@ -616,7 +616,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notStrictEqual(w.a,f.a,"Changed property in original object not changed in clone");
   assert.strictEqual(w.c.x,f.c.x,"Changed object property copied by reference in original object is changed in clone");
   assert.strictEqual(w.c.y.length,f.c.y.length,"Modified sub property array is changed in clone");
-  
+
   /* Deep cloning an object with object and array subproperties */
   w = Komunalne.util.clone(f,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Object type set when deep cloning");
@@ -631,7 +631,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notDeepEqual(w.a,f.a,"Changed property in original object not changed in clone");
   assert.notStrictEqual(w.c.x,f.c.x,"Changed object property in original object is not changed in deep clone");
   assert.notStrictEqual(w.c.y.length,f.c.y.length,"Modified sub property array is not changed in deep clone");
-  
+
   /* Cloning an array with object elements */
   w = Komunalne.util.clone(i);
   assert.ok(Komunalne.util.isArray(w),"Check that the array type is set in clone");
@@ -644,7 +644,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.deepEqual(w[0],i[0],"Change in object element copied by reference is reflected in clone");
   assert.strictEqual(w[3].length,i[3].length,"Change in array element copied by reference is reflected in clone");
   assert.deepEqual(w[3],i[3],"Change in array element copied by reference is reflected in clone");
-  
+
   w = Komunalne.util.clone(i,{ "deep": true });
   assert.ok(Komunalne.util.isArray(w),"Check that the array type is set in deep clone");
   assert.deepEqual(w,i,"Deep equal check for deep cloned array");
@@ -656,7 +656,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.notDeepEqual(w[2],i[2],"Change in cloned object element is not reflected after deep cloning");
   assert.notStrictEqual(w[3].length,i[3].length,"Change in cloned array element is not reflected after deep cloning");
   assert.notDeepEqual(w[3],i[3],"Change in cloned array element is not reflected after deep cloning");
-  
+
   /* Object with circular reference cloning by reference */
   w = Komunalne.util.clone(k);
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced clone type");
@@ -666,7 +666,7 @@ QUnit.test("Cloning objects", function(assert) {
   assert.strictEqual(5,w.x.d,"Change in circular referenced object is reflected in clone");
   k.x.d = 15;
   assert.strictEqual(j.d,w.x.c.d,"Change in circular referenced object is reflected in clone");
-  
+
   w = Komunalne.util.clone(k,{ "deep": true });
   assert.ok(Komunalne.util.isInstanceOf(w,Object),"Checking circular referenced deep clone type");
   assert.notOk(j === w.x,"Circular object first reference is a different object in deep clone");
@@ -690,17 +690,17 @@ QUnit.test("Clone into an existing object", function(assert) {
     return obj;
   };
   var w;
-  
+
   w = Komunalne.util.clone(a,{"into":{"a":0}});
   assert.strictEqual(w.a,1,"Properties overriden without safe flag");
   assert.strictEqual(w.b,2,"Properties copied into the target object");
   assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Only the keys of source object are set");
-  
+
   w = Komunalne.util.clone(a,{"into":{"a":0},"safe":true});
   assert.strictEqual(w.a,0,"Properties not overriden with safe flag");
   assert.strictEqual(w.b,2,"Properties copied into the target object");
   assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Only the keys of source object are set");
-  
+
   w = Komunalne.util.clone(c,{"into":b,"safe":true,"deep":true});
   assert.notOk(c.b === w.b,"Inner object cloned with deep flag set to true");
   assert.notOk(c.b === b.b,"Inner object cloned, original reference checked");
@@ -710,31 +710,31 @@ QUnit.test("Clone into an existing object", function(assert) {
   assert.strictEqual(w.y,9,"Existent properties remains the same");
   assert.strictEqual(w.a,3,"Copied properties from source object");
   assert.deepEqual(w.b,{"x":6,"y":7},"Cloned inner object in target object");
-  
+
   w = Komunalne.util.clone(a,{"into": b});
   assert.strictEqual(w.a,1,"Properties copied into the target object");
   assert.strictEqual(w.b,2,"Properties copied into the target object");
   assert.strictEqual(w.x,8,"Properties not in source remains the same");
   assert.strictEqual(w.y,9,"Properties not in source remains the same");
   assert.deepEqual(Komunalne.util.keys(w),["x","y","a","b"],"Only the keys of source object are set");
-  
+
   assert.throws(
-    function() { 
+    function() {
       Komunalne.util.clone(a,{"into":null, "deep": true});
     },
     Komunalne.util.clone.invalidTarget,
     "Cloning into non object results in exception"
   );
   assert.strictEqual(null,Komunalne.util.clone(null,{"into":{},"deep":true}),"Cloning null results in null");
-  
-  /* 
+
+  /*
    * Clones into an object which replicates itself internally.
    */
   w = Komunalne.util.clone(custom.D("test"),{"deep": true});
   assert.ok(Komunalne.util.isInstanceOf(w,custom.D),"Type of inner self replication object");
   assert.strictEqual("test",w.name,"Properties replication");
   assert.ok(w.defaults === w.defaults.defaults,"Inner self clone is the same instance as parent");
-  
+
   w = Komunalne.util.clone(new custom.D("test"),{"into":{}});
   assert.notOk(Komunalne.util.isInstanceOf(w,custom.D),"If target object is provided clone cannot be of the same type");
   assert.strictEqual("test",w.name,"Properties replication into target object");
@@ -746,24 +746,24 @@ QUnit.test("Clone skipping properties", function(assert) {
   var b = { "m": 1, "n": { "g": "sub", "h": -1 }, "o": false };
   var c = { "a": 10, "b": 20 };
   var w;
-  
+
   w = Komunalne.util.clone(a,{"skip": "x"});
   assert.notOk("x" in w,"Cloning skipping single property: Skipped x property not cloned");
   assert.equal(w.y,2,"Cloning skipping single property: Other properties well cloned: y");
   assert.equal(w.z,3,"Cloning skipping single property: Other properties well cloned: z");
   assert.deepEqual(Komunalne.util.keys(w),["y","z"],"Cloning skipping single property: Only two keys present in clone");
-  
+
   w = Komunalne.util.clone(a,{"skip": ["x","y"]});
   assert.notOk("x" in w,"Object a, skipping x and y: x test");
   assert.notOk("y" in w,"Object a, skipping x and y: y test");
   assert.equal(w.z,3,"Object a, skipping x and y: z present test");
   assert.deepEqual(Komunalne.util.keys(w),["z"],"Only one key present in a clone when skipping x and y");
-  
+
   w = Komunalne.util.clone(c,{"skip": ["x","y"]});
   assert.equal(w.a,10,"Cloning c skipping unexisting properties results in the same object: a test");
   assert.equal(w.b,20,"Cloning c skipping unexisting properties results in the same object: b test");
   assert.deepEqual(Komunalne.util.keys(w),["a","b"],"Clone has only original keys skipping unexisting properties");
-  
+
   w = Komunalne.util.clone(a,{"into": c, "skip": ["z"]});
   assert.equal(w,c,"No new object created when cloning into");
   assert.deepEqual(Komunalne.util.keys(w),["a","b","x","y"],"Skipping z property when cloning a into c");
@@ -771,11 +771,11 @@ QUnit.test("Clone skipping properties", function(assert) {
   assert.equal(w.y,2,"Checking cloned property y");
   assert.equal(w.a,10,"Checking cloned property a");
   assert.equal(w.b,20,"Checking cloned property b");
-  
+
   w = Komunalne.util.clone(b,{"skip":["n","o"],"deep":true});
   assert.deepEqual(Komunalne.util.keys(w),["m"],"Cloning deep an object but skipping sub object properties");
   assert.equal(w.m,1,"Deep clone with skip, cloning only property m");
-  
+
   w = Komunalne.util.clone(b,{"skip":"n.g"});
   assert.deepEqual(Komunalne.util.keys(w),["m","n","o"],"Skipping sub property but without deep flag");
   assert.deepEqual(Komunalne.util.keys(w.n),["g","h"],"Skipped subproperty without deep flag is still present");
@@ -784,7 +784,7 @@ QUnit.test("Clone skipping properties", function(assert) {
   assert.equal(w.n.g,"sub","Skipping sub property but without deep flag: n.g test");
   assert.equal(w.n.h,-1,"Skipping sub property but without deep flag: n.h test");
   assert.strictEqual(w.o,false,"Skipping sub property but without deep flag: o test");
-  
+
   w = Komunalne.util.clone(b,{"skip":["n.h","o","n.h.z"],"deep":true});
   assert.deepEqual(Komunalne.util.keys(w),["m","n"],"Skipping subproperty with deep flag");
   assert.deepEqual(Komunalne.util.keys(w.n),["g"],"Skipped subproperty with deep flag: n.g only present in clone");
@@ -796,13 +796,13 @@ QUnit.test("Clone skipping properties", function(assert) {
 QUnit.test("Text of DOM element", function(assert) {
   var container = $("#test-div");
   var el,child1,child2;
-  
+
   el = $("<div></div>").text("test").attr("id","el-test");
   child1 = $("<span></span>").text("1").attr("id","span-child");
   child2 = $("<span></span>").attr("id","empty-span");
   child1.appendTo(el);
   child2.appendTo(el);
-  
+
   assert.equal(Komunalne.$.elementText(el),"test","Only parent element text is retrieved, not descendants");
   assert.equal(Komunalne.$.elementText(child1),"1","Text is set on child element");
   assert.equal(Komunalne.$.elementText(child2),"","Empty text on second child");
@@ -822,7 +822,7 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.$.elementText(el),"other-text","Text remains in parent after update to child");
   assert.equal(Komunalne.$.elementText(child1),"other","Text child remains the same after using $ function");
   assert.equal(Komunalne.$.elementText(child2),"child-not-empty","Text updated on second child after $ function");
-  
+
   el = $("<div></div>").text("test").attr("id","el-test");
   child1 = $("<span></span>").text("1").attr("id","span-child");
   child2 = $("<span></span>").attr("id","empty-span");
@@ -853,7 +853,7 @@ QUnit.test("Text of DOM element", function(assert) {
   assert.equal(Komunalne.$.elementText("#el-test"),"other-text","Using jQuery based function after changing text");
   assert.equal(Komunalne.dom.elementText("empty-span"),"","Empty text remains on second child after $ function");
   el.remove();
-  
+
   el = document.createElement("div");
   el.id = "el-test";
   child1 = document.createElement("span");
@@ -862,7 +862,7 @@ QUnit.test("Text of DOM element", function(assert) {
   child2.id = "empty-span";
   el.appendChild(child1);
   el.appendChild(child2);
-  
+
   assert.equal(Komunalne.dom.elementText(el),"","All texts are initialized empty: parent div");
   assert.equal(Komunalne.dom.elementText(child1),"","All texts are initialized empty: first span");
   assert.equal(Komunalne.dom.elementText(child2),"","All texts are initialized empty: second span");
@@ -904,7 +904,7 @@ QUnit.test("Number of keys function", function(assert) {
 
 QUnit.test("Currency formatter", function(assert) {
   var suite = new Komunalne.test.Suite();
-  
+
   // Integers.
   suite.add({ "args": [1], "expected": "1.00", "msg": "Integer" });
   suite.add({ "args": [0], "expected": "0.00", "msg": "Integer with 0" });
@@ -917,7 +917,7 @@ QUnit.test("Currency formatter", function(assert) {
   suite.add({ "args": [-123], "expected": "-123.00", "msg": "Negative with 3 digits" });
   suite.add({ "args": [-12345], "expected": "-12,345.00", "msg": "Negative with 5 digits" });
   suite.add({ "args": [-123456789012], "expected": "-123,456,789,012.00", "msg": "Big negative" });
-  
+
   // floats.
   suite.add({ "args": [1.23], "expected": "1.23", "msg": "Float" });
   suite.add({ "args": [0.01], "expected": "0.01", "msg": "Float between 0 and 1" });
@@ -928,7 +928,7 @@ QUnit.test("Currency formatter", function(assert) {
   suite.add({ "args": [1.2], "expected": "1.20", "msg": "Padding zeros" });
   suite.add({ "args": [1.999], "expected": "2.00", "msg": "Complex rounding up" });
   suite.add({ "args": [-1.999], "expected": "-2.00", "msg": "Negative complex round" });
-  
+
   // formatter changing default parameters.
   suite.add({ "args": [1.2333,0], "expected": "1", "msg": "0 decimals" });
   suite.add({ "args": [1001.2333,0,".","-"], "expected": "1-001", "msg": "0 decimals and custom thousands separator" });
@@ -938,11 +938,11 @@ QUnit.test("Currency formatter", function(assert) {
   suite.add({ "args": [1.2,6], "expected": "1.200000", "msg": "Padding zeros" });
   suite.add({ "args": [1.20019001,4], "expected": "1.2002", "msg": "4 decimals round up" });
   suite.add({ "args": [1.23,3,"@"], "expected": "1@230", "msg": "Changing decimal separator" });
-  suite.add({ "args": [12345.567,2,"-","="], "expected": "12=345-57", 
+  suite.add({ "args": [12345.567,2,"-","="], "expected": "12=345-57",
               "msg": "Changing both decimal and thousands separators" });
-  suite.add({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65", 
+  suite.add({ "args": [12345.6543,2,"$%&","--"], "expected": "12--345$%&65",
               "msg": "Length > 1 separators" });
-  
+
   suite.execute(assert.buildFor("equal"),Komunalne.format.currency);
 });
 
@@ -960,7 +960,7 @@ QUnit.test("Check animation is set on an element", function(assert) {
   var wait1 = assert.async();
   var wait2 = assert.async();
   var before,after;
-  
+
   Komunalne.anim.animate(animation,target).then(function() {
     assert.notOk(target.hasClass(animated),"Animated class is removed, first method");
     assert.notOk(target.hasClass(animation),"Animation class is removed, first method");
@@ -968,16 +968,16 @@ QUnit.test("Check animation is set on an element", function(assert) {
   });
   assert.ok(target.hasClass(animated),"Animated class is set, first method");
   assert.ok(target.hasClass(animation),"Animation class is set, first method");
-  
+
   before = function() {
     assert.ok(target.hasClass(animated),"Animated class is set before, second method");
     assert.ok(target.hasClass(animation),"Animation class is set before, second method");
   };
-  after = function() { 
+  after = function() {
     assert.notOk(target.hasClass(animated),"Animated class is removed after, second method");
     assert.notOk(target.hasClass(animation),"Animation class is removed after, second method");
   };
-  
+
   Komunalne.anim.animation(animation,target,before,after).then(function() {
     assert.notOk(target.hasClass(animated),"Animated class is removed, second method");
     assert.notOk(target.hasClass(animation),"Animation class is removed, second method");

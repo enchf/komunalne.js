@@ -6,7 +6,7 @@
  * @param app Second place string, optional, default = ''.
  * @param sep Above strings separator, optional, default = ' '.
  */
-Komunalne.util.append = function(str,app,sep) { 
+Komunalne.util.append = function(str,app,sep) {
   return ((str||"") + (sep||" ") + (app||"")).trim();
 };
 
@@ -22,7 +22,7 @@ Komunalne.util.path = function(obj,path) {
   var paths = path.split(".");
   var el = obj;
   for (var p in paths) {
-    if (Komunalne.util.isInstanceOf(el,Object) && el[paths[p]] !== undefined) el = el[paths[p]]; 
+    if (Komunalne.util.isInstanceOf(el,Object) && el[paths[p]] !== undefined) el = el[paths[p]];
     else { el = null; break; }
   }
   return el;
@@ -34,8 +34,8 @@ Komunalne.util.path = function(obj,path) {
  * @param date Object to be validated as date.
  * @param strict True to check the date validity, false to only check the type.
  */
-Komunalne.util.isDate = function(date,strict) { 
-  return (date instanceof Date) && (!strict || !isNaN(date.valueOf())); 
+Komunalne.util.isDate = function(date,strict) {
+  return (date instanceof Date) && (!strict || !isNaN(date.valueOf()));
 };
 
 /**
@@ -48,7 +48,7 @@ Komunalne.util.isFunction = function(obj) { return typeof obj == "function"; };
  * Returns true if the object is iterable in a 'for (var x in obj) {}' statement.
  * @param obj Object to be validated as iterable.
  */
-Komunalne.util.isIterable = function(obj) { 
+Komunalne.util.isIterable = function(obj) {
   return typeof obj == "object" && obj != undefined && !Komunalne.util.isDate(obj);
 };
 
@@ -56,8 +56,8 @@ Komunalne.util.isIterable = function(obj) {
  * Returns true if the object is an Array.
  * @param obj Object to be validated as an array.
  */
-Komunalne.util.isArray = function(obj) { 
-  return Komunalne.util.isIterable(obj) && obj.constructor && obj.constructor == Array; 
+Komunalne.util.isArray = function(obj) {
+  return Komunalne.util.isIterable(obj) && obj.constructor && obj.constructor == Array;
 };
 
 /**
@@ -107,12 +107,12 @@ Komunalne.util.deepEquals = function(a,b) {
   var equal = true;
   ai = Komunalne.util.isIterable(a);
   bi = Komunalne.util.isIterable(b);
-  
+
   if (ai && bi && (equal = Komunalne.util.areSameClass(a,b))) {
     ait = new Komunalne.helper.Iterator(a);
     bit = new Komunalne.helper.Iterator(b);
     equal = ait.length() == bit.length();
-    
+
     while (ait.hasNext() && equal) {
       an = ait.next();
       bn = bit.next();
@@ -120,7 +120,7 @@ Komunalne.util.deepEquals = function(a,b) {
       equal = equal && ait.currentKey() == bit.currentKey();
     }
   } else equal = (ai == bi && a === b);
-  
+
   return equal;
 };
 
@@ -195,15 +195,15 @@ Komunalne.util.clone = function(obj,cfg) {
   var first = true;
   var replica,refer;
   var skip,innerSkip;
-  
+
   cfg = (cfg || {});
   if ("into" in cfg && (!Komunalne.util.isInstanceOf(cfg.into,"object") || cfg.into == null)) {
     throw Komunalne.util.clone.invalidTarget;
   }
   replica = function(val,skip) { return clone(val,cfg,skip); };
   refer = function(val) { return val; };
-  skip = ("skip" in cfg) ? 
-          ((Komunalne.util.isArray(cfg.skip) && Komunalne.util.isArrayOf(cfg.skip,"string")) ? cfg.skip 
+  skip = ("skip" in cfg) ?
+          ((Komunalne.util.isArray(cfg.skip) && Komunalne.util.isArrayOf(cfg.skip,"string")) ? cfg.skip
           : (Komunalne.util.isInstanceOf(cfg.skip,"string")) ? [cfg.skip] : [])
         : [];
   innerSkip = function(skip) {
@@ -214,11 +214,11 @@ Komunalne.util.clone = function(obj,cfg) {
     }
     return clone;
   };
-  
+
   var clone = function(obj,cfg,skip) {
     var c,i,fn;
     var subskip;
-    
+
     if (obj == null || !Komunalne.util.isInstanceOf(obj,"object")) c = obj;
     else if (Komunalne.util.isInstanceOf(obj,Date)) c = new Date(obj.getTime());
     else if (cfg.deep === true && (i = seen.indexOf(obj)) >= 0) c = clones[i];
@@ -228,7 +228,7 @@ Komunalne.util.clone = function(obj,cfg) {
       // If something fails, the object is passed as reference.
       if (first && "into" in cfg) c = cfg.into;
       else {
-        try { c = new obj.constructor(); } 
+        try { c = new obj.constructor(); }
         catch (e) { c = obj; }
       }
       clones.push(c);
@@ -245,7 +245,7 @@ Komunalne.util.clone = function(obj,cfg) {
         c[x] = (cfg.safe !== true || c[x] === undefined) ? fn(obj[x],subskip) : c[x];
       }
     }
-    
+
     return c;
   };
   return clone(obj,cfg,skip);
