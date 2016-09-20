@@ -104,9 +104,12 @@ QUnit.test("Iterator implementation", function(assert) {
   w = new Komunalne.helper.Iterator(v);
 
   // Wrapper for the exception tests.
-  var wrapper = function(iterator) { return function() { iterator.next(); }; };
-  var keyWrapper = function(iterator) { return function() { iterator.currentKey(); }; };
-
+  var wrapper = function(iterator) {
+    return iterator.next.bind(iterator);
+  };
+  var keyWrapper = function(iterator) {
+    return iterator.currentKey.bind(iterator);
+  };
   assert.strictEqual(a.hasNext(),false,"No next item on empty object");
   assert.strictEqual(b.hasNext(),true,"Object with set keys has next items");
   assert.strictEqual(c.hasNext(),false,"No next item on empty array");
@@ -236,7 +239,7 @@ QUnit.test("Date, Function, Iterable and Array type test functions", function(as
   var all = [dateTest,fnTest,iterableTest,arrayTest];
   var fns = ["isDate","isFunction","isIterable","isArray"];
 
-  for (var i in all) {
+  for (var i = 0; i < all.length; i++) {
     suite = new Komunalne.test.Suite();
     for (var obj in testData) {
       result = all[i].indexOf(obj) >= 0;

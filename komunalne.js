@@ -1,4 +1,4 @@
-/*! komunalne 2016-09-18 */
+/*! komunalne 2016-09-20 */
 /**
  * Komunalne.js - Javascript utils compilation.
  * Object definition.
@@ -11,6 +11,7 @@ Komunalne.test = {};
 Komunalne.$ = {};
 Komunalne.dom = {};
 Komunalne.anim = {};
+Komunalne.isOldIE = false;
 
 /* Shortcut if not defined already */
 if (window.K === undefined) window.K = Komunalne;
@@ -19,6 +20,7 @@ if (window.K === undefined) window.K = Komunalne;
  * Polyfill issues in IE 8-9.
  */
 if (typeof String.prototype.trim !== 'function') {
+  Komunalne.isOldIE = true;
   String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g, '');
   };
@@ -27,6 +29,7 @@ if (typeof String.prototype.trim !== 'function') {
 //Production steps of ECMA-262, Edition 5, 15.4.4.14
 //Reference: http://es5.github.io/#x15.4.4.14
 if (!Array.prototype.indexOf) {
+  Komunalne.isOldIE = true;
   Array.prototype.indexOf = function(searchElement, fromIndex) {
     var k;
 
@@ -92,6 +95,7 @@ if (!Array.prototype.indexOf) {
 //Production steps of ECMA-262, Edition 5, 15.4.4.18
 //Reference: http://es5.github.io/#x15.4.4.18
 if (!Array.prototype.forEach) {
+  Komunalne.isOldIE = true;
   Array.prototype.forEach = function(callback, thisArg) {
     var T = undefined, k;
 
@@ -146,6 +150,34 @@ if (!Array.prototype.forEach) {
       k++;
     }
     // 8. return undefined
+  };
+}
+
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function(oThis) {
+    if (typeof this !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+    }
+
+    var aArgs   = Array.prototype.slice.call(arguments, 1),
+      fToBind = this,
+      fNOP    = function() {},
+      fBound  = function() {
+        return fToBind.apply(this instanceof fNOP
+               ? this
+               : oThis,
+               aArgs.concat(Array.prototype.slice.call(arguments)));
+      };
+
+    if (this.prototype) {
+      // Function.prototype doesn't have a prototype property
+      fNOP.prototype = this.prototype;
+    }
+    fBound.prototype = new fNOP();
+
+    return fBound;
   };
 }
 
@@ -641,7 +673,12 @@ Komunalne.util.clone = function(obj,cfg) {
   innerSkip = function(skip) {
     var index;
     var clone = Komunalne.util.clone(skip);
-    for (var i in clone) {
+    var iterator = new Komunalne.helper.Iterator(clone);
+    var next,i;
+
+    while (iterator.hasNext()) {
+      next = iterator.next();
+      i = iterator.currentKey();
       clone[i] = ((index = clone[i].indexOf(".")) >= 0) ? clone[i].substr(index+1) : "";
     }
     return clone;
@@ -690,6 +727,19 @@ Komunalne.util.clone.invalidTarget = "Target object is null or not an object";
 Komunalne.util.keys = function(obj) {
   var keys = [];
   obj = (obj || {});
-  for (var x in obj) keys.push(x);
+
+  for (var x in obj) {
+    if (Komunalne.isOldIE &&
+      (
+        (Komunalne.util.isArray(obj) && (x == "indexOf" || x == "forEach")) ||
+        (Komunalne.util.isInstanceOf(obj,"string") && (x == "trim")) ||
+        (Komunalne.util.isFunction(obj) && (x == "bind"))
+      )
+    ) {
+      continue;
+    }
+    keys.push(x);
+  }
+
   return keys;
 };
