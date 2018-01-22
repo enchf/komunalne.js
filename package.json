@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "es6-promise-polyfill": "~1.1.1",
-    "jquery": "~1.11.3",
+    "jquery": "~> 3.0.0",
     "animate.css": "~3.5.1"
   },
   "devDependencies": {
